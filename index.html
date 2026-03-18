@@ -6,1679 +6,1266 @@
 <title>STL War Room</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg:        #05070a;
-  --bg2:       #080c10;
-  --bg3:       #0c1018;
-  --bg4:       #101520;
-  --border:    #161e2a;
-  --border2:   #1e2a3a;
-  --border3:   #263040;
-
-  --cr:        #C41E3A;
-  --cr-dim:    #6e1120;
-  --cr-glow:   rgba(196,30,58,0.10);
-  --cr-glow2:  rgba(196,30,58,0.18);
-  --cg:        #FEDB00;
-
-  --bn:        #002F87;
-  --bn-dim:    #001850;
-  --bn-glow:   rgba(0,47,135,0.15);
-  --bg-gold:   #FCB514;
-  --bb:        #19A0DD;
-
-  --t1: #c8d0dc;
-  --t2: #6a7a8e;
-  --t3: #35455a;
-  --t4: #1e2d3e;
-
-  --mono: 'IBM Plex Mono', monospace;
-  --sans: 'IBM Plex Sans', sans-serif;
-
-  --win:  #22c55e;
-  --loss: #ef4444;
-  --otl:  #f59e0b;
+:root{
+  --bg:#05070a;--bg2:#080c10;--bg3:#0c1018;--bg4:#101520;
+  --bdr:#161e2a;--bdr2:#1e2a3a;--bdr3:#263040;
+  --cr:#C41E3A;--cr-dim:#6e1120;--cr-glow:rgba(196,30,58,.10);
+  --gold:#FCB514;--bn-dim:#001850;--bn-glow:rgba(0,47,135,.15);
+  --blue:#19A0DD;
+  --t1:#c8d0dc;--t2:#6a7a8e;--t3:#35455a;
+  --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+  --win:#22c55e;--loss:#ef4444;
 }
-
-*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-html { scroll-behavior:smooth; }
-
-body {
-  background: var(--bg);
-  color: var(--t1);
-  font-family: var(--sans);
-  min-height: 100vh;
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-/* Subtle scanline texture */
-body::after {
-  content:'';
-  position:fixed;
-  inset:0;
-  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
-  pointer-events:none;
-  z-index:1000;
-}
-
-/* ─── HEADER ─── */
-.hdr {
-  position:sticky; top:0; z-index:200;
-  display:flex; align-items:center; justify-content:space-between;
-  height:52px; padding:0 28px;
-  background:rgba(5,7,10,0.98);
-  border-bottom:1px solid var(--border2);
-  backdrop-filter:blur(12px);
-}
-
-.hdr-l { display:flex; align-items:center; gap:16px; }
-
-.live-wrap { display:flex; align-items:center; gap:6px; }
-.live-dot {
-  width:7px; height:7px; border-radius:50%;
-  background:var(--win);
-  box-shadow:0 0 6px var(--win);
-  animation:pulse 2.4s ease-in-out infinite;
-}
-@keyframes pulse {
-  0%,100%{opacity:1;box-shadow:0 0 6px var(--win);}
-  50%{opacity:0.4;box-shadow:0 0 12px var(--win);}
-}
-.live-txt { font-family:var(--mono); font-size:9px; color:var(--win); letter-spacing:.2em; text-transform:uppercase; }
-
-.vr { width:1px; height:20px; background:var(--border2); }
-
-.wordmark { font-family:var(--mono); font-size:15px; font-weight:600; letter-spacing:.12em; color:var(--t1); text-transform:uppercase; }
-.wordmark span { color:var(--cr); }
-
-.hdr-r { display:flex; align-items:center; gap:20px; }
-.hdr-meta { display:flex; align-items:center; gap:16px; }
-.hdr-kv { display:flex; flex-direction:column; align-items:flex-end; gap:1px; }
-.hdr-k { font-family:var(--mono); font-size:8px; color:var(--t3); letter-spacing:.14em; text-transform:uppercase; }
-.hdr-v { font-family:var(--mono); font-size:11px; color:var(--t2); }
-
-/* ─── TABS ─── */
-.tabs {
-  position:sticky; top:52px; z-index:190;
-  display:flex; padding:0 28px;
-  background:rgba(8,12,16,0.98);
-  border-bottom:1px solid var(--border);
-  backdrop-filter:blur(8px);
-}
-
-.tab {
-  display:flex; align-items:center; gap:8px;
-  padding:0 20px; height:42px;
-  font-family:var(--mono); font-size:11px; font-weight:500;
-  letter-spacing:.1em; text-transform:uppercase;
-  color:var(--t3); cursor:pointer;
-  border:none; background:none;
-  border-bottom:2px solid transparent;
-  margin-bottom:-1px;
-  transition:color .15s, border-color .15s;
-}
-.tab:hover { color:var(--t2); }
-.tab.tc.on { color:var(--cr); border-bottom-color:var(--cr); }
-.tab.tb.on { color:var(--bg-gold); border-bottom-color:var(--bg-gold); }
-
-.tag {
-  font-family:var(--mono); font-size:8px; padding:1px 5px;
-  border-radius:2px; letter-spacing:.08em; text-transform:uppercase;
-}
-.tag-c { background:var(--cr-glow); color:var(--cr); border:1px solid var(--cr-dim); }
-.tag-b { background:var(--bn-glow); color:var(--bg-gold); border:1px solid var(--bn-dim); }
-
-/* ─── MAIN ─── */
-.main { padding:24px 28px 60px; max-width:1800px; margin:0 auto; position:relative; z-index:5; }
-.sec { display:none; }
-.sec.on { display:block; animation:fi .2s ease; }
-@keyframes fi { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
-
-/* ─── SECTION HEADER ─── */
-.sec-hdr {
-  display:flex; align-items:center; justify-content:space-between;
-  margin-bottom:20px; padding-bottom:14px;
-  border-bottom:1px solid var(--border2);
-}
-.sec-hdr-l { display:flex; align-items:center; gap:14px; }
-
-.team-logo { width:44px; height:44px; object-fit:contain; filter:drop-shadow(0 2px 8px rgba(0,0,0,0.5)); }
-.team-logo-placeholder {
-  width:44px; height:44px; border-radius:4px;
-  display:flex; align-items:center; justify-content:center;
-  font-family:var(--mono); font-size:13px; font-weight:600;
-}
-.tlp-c { background:var(--cr-glow); border:1px solid var(--cr-dim); color:var(--cr); }
-.tlp-b { background:var(--bn-glow); border:1px solid var(--bn-dim); color:var(--bg-gold); }
-
-.sec-title { font-family:var(--mono); font-size:16px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; line-height:1; }
-.sec-sub { font-family:var(--mono); font-size:9px; color:var(--t3); letter-spacing:.14em; text-transform:uppercase; margin-top:4px; }
-
-.sec-hdr-r { display:flex; align-items:center; gap:10px; }
-
-.record-pill {
-  font-family:var(--mono); font-size:11px; font-weight:500;
-  padding:5px 12px; border-radius:3px; border:1px solid;
-}
-.rp-c { border-color:var(--cr-dim); color:var(--cr); background:var(--cr-glow); }
-.rp-b { border-color:var(--bn-dim); color:var(--bg-gold); background:var(--bn-glow); }
-
-.standings-btn {
-  font-family:var(--mono); font-size:9px; font-weight:500;
-  padding:5px 12px; border-radius:3px; border:1px solid var(--border3);
-  color:var(--t2); background:var(--bg3); cursor:pointer;
-  letter-spacing:.08em; text-transform:uppercase;
-  transition:all .15s; text-decoration:none; display:inline-flex; align-items:center; gap:5px;
-}
-.standings-btn:hover { border-color:var(--border3); color:var(--t1); background:var(--bg4); }
-
-/* ─── PANEL ─── */
-.panel {
-  background:var(--bg2);
-  border:1px solid var(--border);
-  border-radius:4px;
-  overflow:hidden;
-}
-.ph {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:8px 14px;
-  border-bottom:1px solid var(--border);
-  background:var(--bg3);
-}
-.ph-title { font-family:var(--mono); font-size:9px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; }
-.ph-tc { color:var(--cr); }
-.ph-tb { color:var(--bg-gold); }
-.ph-sub { font-family:var(--mono); font-size:8px; color:var(--t3); letter-spacing:.1em; }
-.pb { padding:12px; }
-.pb-sm { padding:6px; }
-
-/* ─── CARDINALS LAYOUT ─── */
-.cards-grid {
-  display:grid;
-  grid-template-columns:1fr 220px 220px;
-  gap:16px;
-  margin-bottom:16px;
-}
-
-/* ─── SVG FIELD ─── */
-.field-wrap {
-  position:relative;
-  background: radial-gradient(ellipse at 50% 80%, #1a3a1a 0%, #0f2410 40%, #081508 100%);
-  border:1px solid #1a2e1a;
-  border-radius:4px;
-  overflow:hidden;
-  min-height:500px;
-}
-
-.field-svg {
-  position:absolute;
-  inset:0;
-  width:100%; height:100%;
-}
-
-.field-label-txt {
-  position:absolute;
-  top:8px; left:12px;
-  font-family:var(--mono); font-size:9px;
-  color:rgba(255,255,255,0.18);
-  letter-spacing:.14em; text-transform:uppercase;
-}
-
-.positions-layer {
-  position:absolute;
-  inset:0;
-}
-
-/* Position slots */
-.pslot {
-  position:absolute;
-  display:flex; flex-direction:column; align-items:center; gap:4px;
-  cursor:pointer;
-  transform:translate(-50%,-50%);
-  transition:filter .15s;
-}
-.pslot:hover { filter:brightness(1.15); }
-
-.pos-lbl {
-  font-family:var(--mono); font-size:8px; font-weight:600;
-  color:var(--cr); letter-spacing:.12em; text-transform:uppercase;
-  text-shadow:0 1px 4px rgba(0,0,0,0.8);
-}
-
-.pcard {
-  width:82px;
-  background:rgba(8,12,16,0.92);
-  border:1px solid var(--border3);
-  border-radius:4px;
-  overflow:hidden;
-  backdrop-filter:blur(4px);
-  transition:border-color .15s;
-}
-.pcard:hover { border-color:var(--cr-dim); }
-
-.pcard-photo {
-  width:100%; height:50px;
-  background:#0f1a0f;
-  display:flex; align-items:flex-end; justify-content:center;
-  overflow:hidden;
-}
-.pcard-photo img { width:100%; height:100%; object-fit:cover; object-position:top center; }
-
-.pcard-init {
-  width:32px; height:42px; margin-bottom:0;
-  background:linear-gradient(180deg,#1a2a1a,#0f1a0f);
-  border-radius:2px 2px 0 0;
-  display:flex; align-items:center; justify-content:center;
-  font-family:var(--mono); font-size:12px; font-weight:600; color:var(--t3);
-}
-
-.pcard-info { padding:4px 6px 5px; }
-.pcard-name { font-family:var(--sans); font-size:10px; font-weight:600; color:var(--t1); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.pcard-stat { font-family:var(--mono); font-size:8px; color:var(--t2); }
-
-.bslot {
-  width:82px; margin-top:2px;
-  background:rgba(5,7,10,0.7);
-  border:1px dashed var(--border2);
-  border-radius:3px;
-  padding:3px 6px;
-  display:flex; align-items:center; gap:4px;
-  cursor:pointer; transition:all .14s;
-}
-.bslot:hover { border-color:var(--cr-dim); background:var(--cr-glow); }
-.bslot-arr { font-size:8px; color:var(--t3); flex-shrink:0; }
-.bslot-name { font-size:9px; color:var(--t2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-
-/* ─── PITCHER ROWS ─── */
-.prow {
-  display:flex; align-items:center; gap:8px;
-  padding:7px 10px; cursor:pointer;
-  transition:background .13s; border-radius:3px;
-}
-.prow:hover { background:var(--bg4); }
-
-.prow-num {
-  font-family:var(--mono); font-size:14px; font-weight:600;
-  color:var(--t3); width:22px; text-align:center; flex-shrink:0;
-}
-
-.prow-photo {
-  width:34px; height:34px; border-radius:50%;
-  background:var(--bg3); border:1px solid var(--border2);
-  overflow:hidden; flex-shrink:0;
-  display:flex; align-items:center; justify-content:center;
-}
-.prow-photo img { width:100%; height:100%; object-fit:cover; object-position:top; }
-.prow-init { font-family:var(--mono); font-size:10px; color:var(--t3); }
-
-.prow-info { flex:1; min-width:0; }
-.prow-name { font-size:12px; font-weight:500; color:var(--t1); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.prow-stat { font-family:var(--mono); font-size:9px; color:var(--t2); }
-
-.rbadge {
-  font-family:var(--mono); font-size:8px; padding:2px 5px;
-  border-radius:2px; letter-spacing:.06em; flex-shrink:0;
-}
-.rb-ace    { background:var(--cr-glow2); color:var(--cr); border:1px solid var(--cr-dim); }
-.rb-sp     { background:var(--bg3); color:var(--t2); border:1px solid var(--border2); }
-.rb-cl     { background:rgba(254,219,0,.1); color:var(--cg); border:1px solid rgba(254,219,0,.3); }
-.rb-su     { background:var(--bg3); color:var(--t2); border:1px solid var(--border2); }
-.rb-rp     { background:var(--bg3); color:var(--t3); border:1px solid var(--border); }
-
-.hdiv { height:1px; background:var(--border); margin:2px 0; }
-
-/* ─── PROSPECTS TABLE ─── */
-.pros-table { width:100%; border-collapse:collapse; }
-.pros-table th {
-  font-family:var(--mono); font-size:8px; font-weight:600;
-  color:var(--t3); letter-spacing:.14em; text-transform:uppercase;
-  padding:6px 8px; text-align:left;
-  border-bottom:1px solid var(--border2);
-  position:sticky; top:0; background:var(--bg3);
-}
-.pros-table td {
-  padding:6px 8px; border-bottom:1px solid var(--border);
-  vertical-align:middle;
-}
-.pros-table tr:hover td { background:var(--bg4); }
-.pros-table tr:last-child td { border-bottom:none; }
-
-.pros-rank { font-family:var(--mono); font-size:11px; font-weight:600; color:var(--t3); }
-.pros-rank.top { color:var(--cg); }
-.pros-rank.high { color:var(--cr); }
-
-.top100-badge {
-  font-family:var(--mono); font-size:7px; padding:1px 4px;
-  border-radius:2px; background:rgba(254,219,0,.12);
-  color:var(--cg); border:1px solid rgba(254,219,0,.3);
-  white-space:nowrap;
-}
-
-.pros-photo {
-  width:28px; height:28px; border-radius:50%;
-  background:var(--bg3); border:1px solid var(--border2);
-  overflow:hidden; display:flex; align-items:center; justify-content:center;
-}
-.pros-photo img { width:100%; height:100%; object-fit:cover; object-position:top; }
-.pros-init { font-family:var(--mono); font-size:9px; color:var(--t3); }
-
-.pros-name { font-size:12px; font-weight:500; color:var(--t1); }
-.pros-pos  { font-family:var(--mono); font-size:9px; color:var(--t2); }
-.pros-stats { font-family:var(--mono); font-size:9px; color:var(--t2); }
-.pros-eta {
-  font-family:var(--mono); font-size:8px; padding:2px 5px;
-  border-radius:2px; border:1px solid var(--border2); color:var(--t2);
-  white-space:nowrap;
-}
-
-/* ─── NEWS ─── */
-.news-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-.news-card {
-  padding:10px 12px;
-  background:var(--bg3); border:1px solid var(--border);
-  border-radius:3px; cursor:pointer; text-decoration:none; color:inherit;
-  transition:border-color .14s, background .14s;
-  display:flex; flex-direction:column; gap:5px;
-}
-.news-card:hover { border-color:var(--border3); background:var(--bg4); }
-.news-meta { display:flex; align-items:center; gap:6px; }
-.news-src { font-family:var(--mono); font-size:8px; color:var(--t3); letter-spacing:.1em; text-transform:uppercase; }
-.news-dt  { font-family:var(--mono); font-size:8px; color:var(--t3); }
-.news-hl  { font-size:11px; font-weight:500; color:var(--t1); line-height:1.4; }
-.news-ex  { font-size:10px; color:var(--t2); line-height:1.4; }
-.news-lnk { font-family:var(--mono); font-size:8px; letter-spacing:.08em; text-transform:uppercase; }
-.nl-c { color:var(--cr); }
-.nl-b { color:var(--bg-gold); }
-
-/* ─── BLUES LAYOUT ─── */
-.blues-grid {
-  display:grid;
-  grid-template-columns:1fr 280px;
-  gap:16px;
-  margin-bottom:16px;
-}
-.blues-l { display:flex; flex-direction:column; gap:14px; }
-.blues-r { display:flex; flex-direction:column; gap:14px; }
-
-/* ─── LINES ─── */
-.line-section { margin-bottom:4px; }
-.line-row {
-  display:flex; align-items:center; gap:8px;
-  padding:7px 10px; cursor:pointer;
-  border-radius:3px; transition:background .13s;
-}
-.line-row:hover { background:var(--bg4); }
-.line-lbl {
-  font-family:var(--mono); font-size:9px; font-weight:600;
-  color:var(--bg-gold); width:22px; flex-shrink:0; letter-spacing:.06em;
-}
-.line-players { display:flex; gap:6px; flex:1; }
-.lp {
-  display:flex; flex-direction:column; align-items:center; gap:2px;
-  flex:1; cursor:pointer;
-}
-.lp-photo {
-  width:36px; height:36px; border-radius:50%;
-  background:var(--bg3); border:1px solid var(--border2);
-  overflow:hidden; display:flex; align-items:center; justify-content:center;
-}
-.lp-photo img { width:100%; height:100%; object-fit:cover; object-position:top; }
-.lp-init { font-family:var(--mono); font-size:10px; color:var(--t3); }
-.lp-name { font-size:9px; font-weight:500; color:var(--t1); text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:60px; }
-.lp-stat { font-family:var(--mono); font-size:8px; color:var(--t2); }
-
-.scratch-row {
-  display:flex; align-items:center; gap:8px;
-  padding:5px 10px;
-  font-family:var(--mono); font-size:9px;
-}
-.scratch-lbl { color:var(--t3); width:60px; flex-shrink:0; text-transform:uppercase; letter-spacing:.08em; }
-.scratch-name { color:var(--t2); }
-.scratch-reason { color:var(--t3); font-size:8px; margin-left:auto; }
-
-/* ─── LAST 5 ─── */
-.game-row {
-  display:flex; align-items:center; gap:10px;
-  padding:7px 12px; border-bottom:1px solid var(--border);
-}
-.game-row:last-child { border-bottom:none; }
-.g-res { font-family:var(--mono); font-size:11px; font-weight:600; width:14px; }
-.g-opp { font-size:11px; color:var(--t2); flex:1; }
-.g-score { font-family:var(--mono); font-size:11px; color:var(--t1); }
-
-/* ─── TEAM STATS ─── */
-.stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
-.stat-box {
-  background:var(--bg3); border:1px solid var(--border);
-  border-radius:3px; padding:10px 8px; text-align:center;
-}
-.stat-val { font-family:var(--mono); font-size:22px; font-weight:600; line-height:1; margin-bottom:3px; }
-.sv-c { color:var(--cr); }
-.sv-b { color:var(--bg-gold); }
-.sv-n { color:var(--t1); }
-.stat-lbl { font-family:var(--mono); font-size:8px; color:var(--t3); letter-spacing:.12em; text-transform:uppercase; }
-
-/* ─── DRAFT / SCOUTING ─── */
-.draft-pick {
-  border:1px solid var(--border2);
-  border-radius:4px;
-  overflow:hidden;
-  margin-bottom:12px;
-  background:var(--bg3);
-}
-.dp-header {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:8px 14px;
-  background:var(--bg4);
-  border-bottom:1px solid var(--border2);
-}
-.dp-round {
-  font-family:var(--mono); font-size:10px; font-weight:600;
-  color:var(--bg-gold); letter-spacing:.1em; text-transform:uppercase;
-}
-.dp-num {
-  font-family:var(--mono); font-size:10px; color:var(--t2);
-  letter-spacing:.06em;
-}
-.dp-origin {
-  font-family:var(--mono); font-size:8px; color:var(--t3);
-  padding:2px 6px; border:1px solid var(--border2); border-radius:2px;
-}
-
-.scout-card {
-  display:flex; align-items:flex-start; gap:12px;
-  padding:10px 14px; border-bottom:1px solid var(--border);
-  cursor:pointer; transition:background .13s;
-}
-.scout-card:hover { background:var(--bg4); }
-.scout-card:last-child { border-bottom:none; }
-
-.sc-rank {
-  font-family:var(--mono); font-size:18px; font-weight:600;
-  color:var(--t3); width:28px; text-align:center; flex-shrink:0; line-height:1.2;
-}
-.sc-rank.r1 { color:var(--bg-gold); }
-.sc-rank.r2 { color:var(--t1); }
-.sc-rank.r3 { color:var(--t2); }
-
-.sc-photo {
-  width:44px; height:44px; border-radius:4px;
-  background:var(--bg2); border:1px solid var(--border2);
-  overflow:hidden; flex-shrink:0;
-  display:flex; align-items:center; justify-content:center;
-}
-.sc-init { font-family:var(--mono); font-size:13px; color:var(--t3); }
-
-.sc-info { flex:1; min-width:0; }
-.sc-name { font-size:13px; font-weight:600; color:var(--t1); margin-bottom:2px; }
-.sc-meta { font-family:var(--mono); font-size:9px; color:var(--t2); margin-bottom:4px; }
-.sc-desc { font-size:10px; color:var(--t2); line-height:1.4; }
-
-.sc-grades { display:flex; gap:6px; flex-wrap:wrap; margin-top:5px; }
-.sc-grade {
-  font-family:var(--mono); font-size:8px;
-  padding:2px 5px; border-radius:2px;
-  border:1px solid var(--border2); color:var(--t2);
-}
-.sg-elite { border-color:rgba(254,181,20,.4); color:var(--bg-gold); background:rgba(254,181,20,.06); }
-.sg-plus  { border-color:rgba(34,197,94,.3); color:var(--win); background:rgba(34,197,94,.05); }
-.sg-avg   { border-color:var(--border2); color:var(--t2); }
-
-.sc-fit-tag {
-  font-family:var(--mono); font-size:8px; padding:2px 6px;
-  border-radius:2px; background:var(--bn-glow);
-  color:var(--bb); border:1px solid rgba(25,160,221,.2);
-  flex-shrink:0; margin-top:2px; align-self:flex-start;
-}
-
-/* ─── BLUES PROSPECTS ─── */
-.bpros-table { width:100%; border-collapse:collapse; }
-.bpros-table th {
-  font-family:var(--mono); font-size:8px; font-weight:600;
-  color:var(--t3); letter-spacing:.14em; text-transform:uppercase;
-  padding:6px 8px; text-align:left;
-  border-bottom:1px solid var(--border2);
-  background:var(--bg3);
-}
-.bpros-table td {
-  padding:6px 8px; border-bottom:1px solid var(--border);
-  vertical-align:middle;
-}
-.bpros-table tr:hover td { background:var(--bg4); }
-.bpros-table tr:last-child td { border-bottom:none; }
-
-/* ─── POPUP ─── */
-.overlay {
-  display:none; position:fixed; inset:0;
-  background:rgba(0,0,0,0.8); z-index:300;
-  align-items:center; justify-content:center;
-  backdrop-filter:blur(6px);
-}
-.overlay.on { display:flex; animation:fi .18s ease; }
-
-.popup {
-  background:var(--bg2); border:1px solid var(--border3);
-  border-radius:5px; width:600px; max-width:95vw;
-  max-height:86vh; overflow-y:auto;
-  box-shadow:0 32px 80px rgba(0,0,0,0.8);
-  animation:pop .2s ease;
-}
-@keyframes pop {
-  from{opacity:0;transform:scale(.96) translateY(8px)}
-  to{opacity:1;transform:scale(1) translateY(0)}
-}
-
-.pop-hdr {
-  display:flex; align-items:center; gap:12px;
-  padding:16px 18px 14px;
-  border-bottom:1px solid var(--border2);
-}
-.pop-photo {
-  width:56px; height:56px; border-radius:5px;
-  background:var(--bg3); border:1px solid var(--border2);
-  overflow:hidden; flex-shrink:0;
-  display:flex; align-items:center; justify-content:center;
-}
-.pop-photo img { width:100%; height:100%; object-fit:cover; object-position:top; }
-.pop-init { font-family:var(--mono); font-size:16px; color:var(--t3); }
-.pop-info { flex:1; }
-.pop-name { font-family:var(--mono); font-size:20px; font-weight:600; letter-spacing:.04em; line-height:1; margin-bottom:4px; }
-.pop-meta { font-family:var(--mono); font-size:9px; color:var(--t2); letter-spacing:.1em; text-transform:uppercase; }
-.pop-close {
-  width:28px; height:28px; border-radius:3px;
-  background:var(--bg3); border:1px solid var(--border2);
-  color:var(--t2); font-size:14px; cursor:pointer;
-  display:flex; align-items:center; justify-content:center;
-  transition:all .13s; flex-shrink:0;
-}
-.pop-close:hover { color:var(--t1); background:var(--bg4); }
-
-.pop-body { padding:16px 18px; }
-.pop-section { font-family:var(--mono); font-size:8px; font-weight:600; color:var(--t3); letter-spacing:.16em; text-transform:uppercase; margin:14px 0 8px; padding-bottom:5px; border-bottom:1px solid var(--border); }
-.pop-section:first-child { margin-top:0; }
-
-.pop-stat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:12px; }
-.pop-stat-box { background:var(--bg3); border:1px solid var(--border); border-radius:3px; padding:10px 8px; text-align:center; }
-.psv { font-family:var(--mono); font-size:22px; font-weight:600; line-height:1; margin-bottom:3px; }
-.psl { font-family:var(--mono); font-size:8px; color:var(--t3); letter-spacing:.12em; text-transform:uppercase; }
-
-.pitch-row { display:flex; align-items:center; gap:8px; margin-bottom:5px; }
-.pitch-type { font-family:var(--mono); font-size:9px; color:var(--t2); width:34px; flex-shrink:0; }
-.pitch-bar { flex:1; height:5px; background:var(--bg3); border-radius:2px; overflow:hidden; }
-.pitch-fill { height:100%; border-radius:2px; background:var(--cr); transition:width .5s ease; }
-.pitch-fill-b { background:var(--bg-gold); }
-.pitch-pct { font-family:var(--mono); font-size:9px; color:var(--t2); width:28px; text-align:right; flex-shrink:0; }
-.pitch-vel { font-family:var(--mono); font-size:9px; color:var(--t3); width:40px; text-align:right; flex-shrink:0; }
-
-.ext-link {
-  display:inline-flex; align-items:center; gap:5px;
-  font-family:var(--mono); font-size:9px; letter-spacing:.08em; text-transform:uppercase;
-  padding:6px 10px; border-radius:3px; border:1px solid var(--border2);
-  color:var(--t2); text-decoration:none; transition:all .13s; margin-top:4px;
-}
-.ext-link:hover { color:var(--t1); border-color:var(--border3); }
-.el-c:hover { color:var(--cr); border-color:var(--cr-dim); }
-.el-b:hover { color:var(--bg-gold); border-color:var(--bn-dim); }
-
-/* ─── LOADING ─── */
-.ld { display:flex; flex-direction:column; align-items:center; gap:8px; padding:30px; }
-.spinner { width:20px; height:20px; border:2px solid var(--border2); border-top-color:var(--cr); border-radius:50%; animation:spin .7s linear infinite; }
-.spinner-b { border-top-color:var(--bg-gold); }
-@keyframes spin { to{transform:rotate(360deg)} }
-.ld-txt { font-family:var(--mono); font-size:9px; color:var(--t3); letter-spacing:.12em; text-transform:uppercase; }
-
-/* ─── SCROLLBAR ─── */
-::-webkit-scrollbar { width:4px; height:4px; }
-::-webkit-scrollbar-track { background:var(--bg); }
-::-webkit-scrollbar-thumb { background:var(--border3); border-radius:2px; }
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px;min-height:100vh}
+
+/* HEADER */
+.hdr{position:sticky;top:0;z-index:200;display:flex;align-items:center;justify-content:space-between;height:48px;padding:0 28px;background:rgba(5,7,10,.98);border-bottom:1px solid var(--bdr2);backdrop-filter:blur(12px)}
+.hdr-l{display:flex;align-items:center;gap:12px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--win);box-shadow:0 0 6px var(--win);animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hdr .live{font-family:var(--mono);font-size:10px;color:var(--win);letter-spacing:.2em;text-transform:uppercase}
+.vr{width:1px;height:18px;background:var(--bdr2)}
+.wm{font-family:var(--mono);font-size:17px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--t1)}
+.wm b{color:var(--cr);font-weight:600}
+.hdr-r{font-family:var(--mono);font-size:11px;color:var(--t2)}
+
+/* TABS */
+.tabs{position:sticky;top:48px;z-index:190;display:flex;padding:0 28px;background:rgba(8,12,16,.98);border-bottom:1px solid var(--bdr);backdrop-filter:blur(8px)}
+.tab{display:flex;align-items:center;gap:8px;padding:0 20px;height:42px;font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-1px;transition:.15s}
+.tab:hover{color:var(--t2)}
+.tab.on.tc{color:var(--cr);border-bottom-color:var(--cr)}
+.tab.on.tb{color:var(--gold);border-bottom-color:var(--gold)}
+.tag{font-size:9px;padding:2px 6px;border-radius:2px;letter-spacing:.08em}
+.tag-c{background:var(--cr-glow);color:var(--cr);border:1px solid var(--cr-dim)}
+.tag-b{background:var(--bn-glow);color:var(--gold);border:1px solid var(--bn-dim)}
+
+/* MAIN */
+.main{padding:20px 28px 60px;max-width:1500px;margin:0 auto}
+.sec{display:none}.sec.on{display:block;animation:fi .2s ease}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* SECTION HEADER */
+.shdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--bdr2)}
+.shdr-l{display:flex;align-items:center;gap:12px}
+.tlogo{width:42px;height:42px;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,.5))}
+.stitle{font-family:var(--mono);font-size:18px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;line-height:1}
+.ssub{font-family:var(--mono);font-size:10px;color:var(--t3);letter-spacing:.12em;text-transform:uppercase;margin-top:4px}
+.rec{font-family:var(--mono);font-size:13px;font-weight:500;padding:5px 12px;border-radius:3px;border:1px solid}
+.rec-c{border-color:var(--cr-dim);color:var(--cr);background:var(--cr-glow)}
+.rec-b{border-color:var(--bn-dim);color:var(--gold);background:var(--bn-glow)}
+.sbtn{font-family:var(--mono);font-size:10px;padding:5px 10px;border-radius:3px;border:1px solid var(--bdr3);color:var(--t2);background:var(--bg3);text-decoration:none;letter-spacing:.08em;text-transform:uppercase;transition:.15s}
+.sbtn:hover{color:var(--t1);background:var(--bg4)}
+.shdr-r{display:flex;align-items:center;gap:8px}
+
+/* PANEL */
+.pnl{background:var(--bg2);border:1px solid var(--bdr);border-radius:4px;overflow:hidden;margin-bottom:16px}
+.pnl-h{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid var(--bdr);background:var(--bg3)}
+.pnl-t{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase}
+.ptc{color:var(--cr)}.ptb{color:var(--gold)}
+.pnl-s{font-family:var(--mono);font-size:9px;color:var(--t3);letter-spacing:.08em}
+
+/* STAT BAR */
+.sbar{display:grid;gap:8px;margin-bottom:16px}
+.sbox{background:var(--bg3);border:1px solid var(--bdr);border-radius:3px;padding:12px 8px;text-align:center}
+.sval{font-family:var(--mono);font-size:22px;font-weight:600;line-height:1;margin-bottom:3px}
+.slbl{font-family:var(--mono);font-size:9px;color:var(--t3);letter-spacing:.1em;text-transform:uppercase}
+
+/* FIELD - simple top-down diamond */
+.field{position:relative;background:#0a1a06;border-radius:4px;height:520px;overflow:hidden}
+.field svg{position:absolute;inset:0;width:100%;height:100%}
+.pos{position:absolute;display:flex;flex-direction:column;align-items:center;gap:3px;transform:translate(-50%,-50%);cursor:pointer;z-index:10;transition:.15s}
+.pos:hover{transform:translate(-50%,-50%) scale(1.08)}
+.pos-lbl{font-family:var(--mono);font-size:9px;font-weight:600;color:rgba(255,255,255,.55);letter-spacing:.1em;text-transform:uppercase;background:rgba(0,0,0,.5);padding:1px 4px;border-radius:2px}
+.pos-circ{width:54px;height:54px;border-radius:50%;border:2px solid rgba(255,255,255,.25);background:#1a2218;overflow:hidden;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(0,0,0,.6)}
+.pos:hover .pos-circ{border-color:var(--cr)}
+.pos-circ img{width:100%;height:110%;object-fit:cover;object-position:top}
+.pos-init{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--t3)}
+.pos-nm{font-size:13px;font-weight:600;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.9);white-space:nowrap;background:rgba(0,0,0,.5);padding:1px 5px;border-radius:2px}
+
+/* PITCHER / PLAYER ROWS */
+.prow{display:flex;align-items:center;gap:10px;padding:9px 12px;cursor:pointer;transition:.13s;border-radius:3px}
+.prow:hover{background:var(--bg4)}
+.prow-n{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--t3);width:20px;text-align:center;flex-shrink:0}
+.prow-pic{width:40px;height:40px;border-radius:50%;background:var(--bg3);border:1px solid var(--bdr2);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.prow-pic img{width:100%;height:110%;object-fit:cover;object-position:top}
+.prow-i{font-family:var(--mono);font-size:11px;color:var(--t3)}
+.prow-info{flex:1;min-width:0}
+.prow-name{font-size:14px;font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prow-stat{font-family:var(--mono);font-size:11px;color:var(--t2);margin-top:1}
+.badge{font-family:var(--mono);font-size:9px;padding:2px 6px;border-radius:2px;letter-spacing:.06em;flex-shrink:0}
+.b-ace{background:rgba(196,30,58,.18);color:var(--cr);border:1px solid var(--cr-dim)}
+.b-sp{background:var(--bg3);color:var(--t2);border:1px solid var(--bdr2)}
+.b-cl{background:rgba(254,219,0,.1);color:var(--gold);border:1px solid rgba(254,219,0,.3)}
+.b-rp{background:var(--bg3);color:var(--t3);border:1px solid var(--bdr)}
+.b-su{background:var(--bg3);color:var(--t2);border:1px solid var(--bdr2)}
+.hdiv{height:1px;background:var(--bdr);margin:1px 0}
+
+/* BLUES LINE CARD */
+.lcard{display:grid;grid-template-columns:44px 1fr;align-items:center;padding:12px 0;border-bottom:1px solid var(--bdr)}
+.lcard:last-child{border-bottom:none}
+.lnum{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--gold);text-align:center}
+.lplayers{display:flex;gap:0;flex:1}
+.lslot{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:0 6px;cursor:pointer;border-right:1px solid var(--bdr);border-radius:3px;transition:.13s}
+.lslot:last-child{border-right:none}
+.lslot:hover{background:var(--bg4)}
+.lpos{font-family:var(--mono);font-size:9px;color:var(--t3);letter-spacing:.1em;text-transform:uppercase}
+.lcirc{width:50px;height:50px;border-radius:50%;background:var(--bg3);border:1px solid var(--bdr2);overflow:hidden;display:flex;align-items:center;justify-content:center}
+.lcirc img{width:100%;height:110%;object-fit:cover;object-position:top}
+.lnm{font-size:13px;font-weight:600;color:var(--t1);text-align:center;white-space:nowrap}
+.lst{font-family:var(--mono);font-size:10px;color:var(--t2)}
+.acq{font-family:var(--mono);font-size:8px;padding:1px 4px;border-radius:2px;background:rgba(25,160,221,.12);color:var(--blue);border:1px solid rgba(25,160,221,.25);margin-left:3px}
+
+/* PAIR CARD */
+.pcard{display:grid;grid-template-columns:44px 1fr 1fr;align-items:center;padding:12px 0;border-bottom:1px solid var(--bdr)}
+.pcard:last-child{border-bottom:none}
+
+/* GOALIE ROW */
+.grow{display:flex;align-items:center;gap:12px;padding:10px 12px;cursor:pointer;transition:.13s}
+.grow:hover{background:var(--bg4)}
+.grow .lcirc{flex-shrink:0}
+.g-info{flex:1}
+.g-nm{font-size:14px;font-weight:600;color:var(--t1)}
+.g-st{font-family:var(--mono);font-size:11px;color:var(--t2);margin-top:2px}
+
+/* PROSPECT TABLE */
+.ptbl{width:100%;border-collapse:collapse}
+.ptbl th{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--t3);letter-spacing:.12em;text-transform:uppercase;padding:7px 10px;text-align:left;border-bottom:1px solid var(--bdr2);background:var(--bg3);position:sticky;top:0;z-index:2}
+.ptbl td{padding:8px 10px;border-bottom:1px solid var(--bdr);vertical-align:middle}
+.ptbl tr:hover td{background:var(--bg4);cursor:pointer}
+.ptbl tr:last-child td{border-bottom:none}
+.prk{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--t3)}
+.prk.top{color:var(--gold)}.prk.hi{color:var(--cr)}
+.t100{font-family:var(--mono);font-size:8px;padding:1px 4px;border-radius:2px;background:rgba(254,219,0,.12);color:var(--gold);border:1px solid rgba(254,219,0,.3);display:block;margin-top:2px;white-space:nowrap}
+.pnm{font-size:14px;font-weight:600;color:var(--t1)}
+.ppos{font-family:var(--mono);font-size:11px;color:var(--t2)}
+.fv{font-family:var(--mono);font-size:10px;font-weight:600;padding:2px 7px;border-radius:2px}
+.fv60{background:rgba(34,197,94,.12);color:var(--win);border:1px solid rgba(34,197,94,.3)}
+.fv55{background:rgba(254,181,20,.1);color:var(--gold);border:1px solid rgba(254,181,20,.3)}
+.fv50{background:var(--bg3);color:var(--t2);border:1px solid var(--bdr2)}
+.fv45{background:var(--bg3);color:var(--t3);border:1px solid var(--bdr)}
+.eta{font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:2px;border:1px solid var(--bdr2);color:var(--t2)}
+
+/* DRAFT PICK */
+.dpick{border:1px solid var(--bdr2);border-radius:4px;overflow:hidden;margin-bottom:12px;background:var(--bg3)}
+.dp-h{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg4);border-bottom:1px solid var(--bdr2)}
+.dp-r{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--gold);letter-spacing:.08em;text-transform:uppercase}
+.dp-t{font-family:var(--mono);font-size:9px;color:var(--t3);padding:1px 5px;border:1px solid var(--bdr2);border-radius:2px}
+.dp-note{font-family:var(--mono);font-size:9px;color:var(--t3);padding:6px 12px;border-bottom:1px solid var(--bdr)}
+
+/* NEWS LINKS */
+.nlink{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--bdr);text-decoration:none;color:inherit;transition:.13s}
+.nlink:last-child{border-bottom:none}
+.nlink:hover{background:var(--bg4)}
+.nsrc{font-family:var(--mono);font-size:9px;color:var(--t3);letter-spacing:.08em;text-transform:uppercase;width:100px;flex-shrink:0}
+.nhl-t{font-size:14px;font-weight:500;color:var(--t1);flex:1}
+
+/* GAME ROW */
+.grow{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--bdr)}
+.grow:last-child{border-bottom:none}
+.gres{font-family:var(--mono);font-size:12px;font-weight:600;width:14px}
+
+/* FILTER BUTTONS */
+.fbtn{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:4px 9px;border-radius:2px;border:1px solid var(--bdr2);background:var(--bg4);color:var(--t3);cursor:pointer;transition:.13s}
+.fbtn:hover{color:var(--t1)}.fbtn.on.fc{border-color:var(--cr-dim);color:var(--cr);background:var(--cr-glow)}.fbtn.on.fb{border-color:var(--bn-dim);color:var(--gold);background:var(--bn-glow)}
+
+/* POPUP */
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:300;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
+.ov.on{display:flex;animation:fi .18s ease}
+.popup{background:var(--bg2);border:1px solid var(--bdr3);border-radius:5px;width:580px;max-width:95vw;max-height:86vh;overflow-y:auto;box-shadow:0 32px 80px rgba(0,0,0,.8)}
+.pop-h{display:flex;align-items:center;gap:12px;padding:16px 18px 12px;border-bottom:1px solid var(--bdr2)}
+.pop-pic{width:60px;height:60px;border-radius:6px;background:var(--bg3);border:1px solid var(--bdr2);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.pop-pic img{width:100%;height:110%;object-fit:cover;object-position:top}
+.pop-nm{font-family:var(--mono);font-size:21px;font-weight:600;letter-spacing:.04em;line-height:1;margin-bottom:3px}
+.pop-meta{font-family:var(--mono);font-size:10px;color:var(--t2);letter-spacing:.08em;text-transform:uppercase}
+.pop-x{width:30px;height:30px;border-radius:3px;background:var(--bg3);border:1px solid var(--bdr2);color:var(--t2);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.13s}
+.pop-x:hover{color:var(--t1);background:var(--bg4)}
+.pop-b{padding:16px 18px}
+.pop-sec{font-family:var(--mono);font-size:9px;font-weight:600;color:var(--t3);letter-spacing:.14em;text-transform:uppercase;margin:12px 0 6px;padding-bottom:4px;border-bottom:1px solid var(--bdr)}
+.pop-sec:first-child{margin-top:0}
+.pop-sg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
+.pop-s{background:var(--bg3);border:1px solid var(--bdr);border-radius:3px;padding:10px 6px;text-align:center}
+.psv{font-family:var(--mono);font-size:24px;font-weight:600;line-height:1;margin-bottom:3px}
+.psl{font-family:var(--mono);font-size:9px;color:var(--t3);letter-spacing:.1em;text-transform:uppercase}
+.elink{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:6px 10px;border-radius:3px;border:1px solid var(--bdr2);color:var(--t2);text-decoration:none;transition:.13s;margin:2px}
+.elink:hover{color:var(--t1);border-color:var(--bdr3)}
+.el-c:hover{color:var(--cr);border-color:var(--cr-dim)}
+.el-b:hover{color:var(--gold);border-color:var(--bn-dim)}
+
+.empty{padding:20px;text-align:center;font-family:var(--mono);font-size:10px;color:var(--t3)}
+
+/* DIVISION STANDINGS TABLE */
+.dtbl{width:100%;border-collapse:collapse}
+.dtbl th{font-family:var(--mono);font-size:9px;font-weight:600;color:var(--t3);letter-spacing:.1em;text-transform:uppercase;padding:6px 8px;text-align:center;border-bottom:1px solid var(--bdr2);background:var(--bg3)}
+.dtbl th:first-child{text-align:left}
+.dtbl td{padding:6px 8px;border-bottom:1px solid var(--bdr);font-family:var(--mono);font-size:13px;text-align:center;color:var(--t2)}
+.dtbl td:first-child{text-align:left;color:var(--t1);font-weight:500}
+.dtbl tr.me td{color:var(--t1);font-weight:600}
+.dtbl tr.me td:first-child{color:var(--cr)}
+.dtbl-b tr.me td:first-child{color:var(--gold)}
+.dtbl tr:hover td{background:var(--bg4)}
+
+/* SCHEDULE ROW */
+.schd{display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--bdr)}
+.schd:last-child{border-bottom:none}
+.schd-dt{font-family:var(--mono);font-size:10px;color:var(--t3);width:70px;flex-shrink:0;text-align:center}
+.schd-opp{display:flex;align-items:center;gap:6px;flex:1}
+.schd-logo{width:26px;height:26px;object-fit:contain}
+.schd-vs{font-family:var(--mono);font-size:10px;color:var(--t3);width:16px}
+.schd-nm{font-size:13px;font-weight:500;color:var(--t1)}
+.schd-time{font-family:var(--mono);font-size:11px;color:var(--t2)}
+.schd-prob{font-family:var(--mono);font-size:10px;color:var(--t3);text-align:right}
+
+/* INJURY / TRANSACTION ROW */
+.ilrow{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--bdr);font-size:13px}
+.ilrow:last-child{border-bottom:none}
+.il-nm{font-weight:600;color:var(--t1);flex:1}
+.il-pos{font-family:var(--mono);font-size:10px;color:var(--t3);width:32px}
+.il-reason{font-family:var(--mono);font-size:10px;color:var(--t2);flex:1;text-align:right}
+.il-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.il-60{background:var(--loss)}.il-15{background:#f59e0b}.il-10{background:var(--gold)}
+.txrow{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--bdr);font-size:12px}
+.txrow:last-child{border-bottom:none}
+.tx-dt{font-family:var(--mono);font-size:9px;color:var(--t3);width:50px;flex-shrink:0}
+.tx-desc{color:var(--t2);flex:1}
+.tx-desc b{color:var(--t1);font-weight:600}
+
+/* HEADLINE CARD */
+.hl-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px}
+.hl-card{display:flex;gap:10px;padding:10px;border:1px solid var(--bdr);border-radius:4px;background:var(--bg3);text-decoration:none;color:inherit;transition:.15s;overflow:hidden}
+.hl-card:hover{border-color:var(--bdr3);background:var(--bg4)}
+.hl-img{width:110px;height:72px;border-radius:3px;object-fit:cover;flex-shrink:0;background:var(--bg4)}
+.hl-body{flex:1;min-width:0}
+.hl-title{font-size:13px;font-weight:600;color:var(--t1);line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.hl-src{font-family:var(--mono);font-size:9px;color:var(--t3);letter-spacing:.08em;text-transform:uppercase;margin-top:4px}
+
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bdr3);border-radius:2px}
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
 <header class="hdr">
   <div class="hdr-l">
-    <div class="live-wrap">
-      <div class="live-dot"></div>
-      <span class="live-txt">Live</span>
-    </div>
+    <div class="dot"></div><span class="live">Live</span>
     <div class="vr"></div>
-    <div class="wordmark"><span>STL</span> WAR ROOM</div>
+    <div class="wm"><b>STL</b> WAR ROOM</div>
   </div>
-  <div class="hdr-r">
-    <div class="hdr-meta">
-      <div class="hdr-kv">
-        <span class="hdr-k">Season</span>
-        <span class="hdr-v">2025–26</span>
-      </div>
-      <div class="vr"></div>
-      <div class="hdr-kv">
-        <span class="hdr-k">Updated</span>
-        <span class="hdr-v" id="ts">--:--</span>
-      </div>
-    </div>
-  </div>
+  <div class="hdr-r" id="ts"></div>
 </header>
 
-<!-- TABS -->
 <nav class="tabs">
-  <button class="tab tc on" onclick="sw('cards')">
-    St. Louis Cardinals <span class="tag tag-c">MLB</span>
-  </button>
-  <button class="tab tb" onclick="sw('blues')">
-    St. Louis Blues <span class="tag tag-b">NHL</span>
-  </button>
+  <button class="tab tc on" onclick="sw('c')">Cardinals <span class="tag tag-c">MLB</span></button>
+  <button class="tab tb" onclick="sw('b')">Blues <span class="tag tag-b">NHL</span></button>
 </nav>
 
 <main class="main">
 
-<!-- ══════════════════════════════════════════
-     CARDINALS
-══════════════════════════════════════════ -->
+<!-- ═══ CARDINALS ═══ -->
 <section id="sc" class="sec on">
-
-  <div class="sec-hdr">
-    <div class="sec-hdr-l">
-      <img class="team-logo" src="https://www.mlbstatic.com/team-logos/138.svg"
-           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" alt="STL">
-      <div class="team-logo-placeholder tlp-c" style="display:none">STL</div>
-      <div>
-        <div class="sec-title" style="color:var(--cr)">St. Louis Cardinals</div>
-        <div class="sec-sub">2025 Roster · Depth Chart · Prospects</div>
-      </div>
+  <div class="shdr">
+    <div class="shdr-l">
+      <img class="tlogo" src="https://www.mlbstatic.com/team-logos/138.svg" alt="STL" onerror="this.style.display='none'">
+      <div><div class="stitle" style="color:var(--cr)">St. Louis Cardinals</div><div class="ssub">2026 · Regular Season · NL Central</div></div>
     </div>
-    <div class="sec-hdr-r">
-      <div class="record-pill rp-c" id="cards-rec">— — —</div>
-      <a class="standings-btn" href="https://www.mlb.com/standings" target="_blank" rel="noopener">
-        ↗ Standings
-      </a>
+    <div class="shdr-r">
+      <div class="rec rec-c" id="crec">Loading...</div>
+      <a class="sbtn" href="https://www.mlb.com/standings" target="_blank">↗ Standings</a>
     </div>
   </div>
 
-  <!-- ROW 1: Field + Rotation + Bullpen -->
-  <div class="cards-grid" style="margin-bottom:16px">
-
-    <!-- FIELD DEPTH CHART -->
-    <div class="panel" style="overflow:visible">
-      <div class="ph">
-        <span class="ph-title ph-tc">Defensive Depth Chart</span>
-        <span class="ph-sub">Click player for Statcast</span>
-      </div>
-      <div class="field-wrap" style="height:520px">
-        <span class="field-label-txt">Field View — Busch Stadium III</span>
-
-        <!-- SVG Field -->
-        <svg class="field-svg" viewBox="0 0 600 520" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <radialGradient id="grass" cx="50%" cy="75%" r="70%">
-              <stop offset="0%" stop-color="#1e4a1e"/>
-              <stop offset="60%" stop-color="#143214"/>
-              <stop offset="100%" stop-color="#0a1e0a"/>
-            </radialGradient>
-            <radialGradient id="dirt" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stop-color="#3a2a1a"/>
-              <stop offset="100%" stop-color="#2a1e10"/>
-            </radialGradient>
-            <!-- Grass stripes -->
-            <pattern id="stripes" patternUnits="userSpaceOnUse" width="22" height="22" patternTransform="rotate(45)">
-              <rect width="22" height="22" fill="transparent"/>
-              <rect width="11" height="22" fill="rgba(255,255,255,0.018)"/>
-            </pattern>
-          </defs>
-
-          <!-- Outfield grass -->
-          <ellipse cx="300" cy="480" rx="320" ry="310" fill="url(#grass)"/>
-          <ellipse cx="300" cy="480" rx="320" ry="310" fill="url(#stripes)"/>
-
-          <!-- Warning track arc -->
-          <path d="M 30,480 Q 300,-40 570,480" stroke="#5a4020" stroke-width="28" fill="none" opacity="0.7"/>
-
-          <!-- Foul lines -->
-          <line x1="300" y1="440" x2="20" y2="80" stroke="#8a7a5a" stroke-width="1.5" opacity="0.5"/>
-          <line x1="300" y1="440" x2="580" y2="80" stroke="#8a7a5a" stroke-width="1.5" opacity="0.5"/>
-
-          <!-- Infield dirt -->
-          <ellipse cx="300" cy="350" rx="165" ry="145" fill="url(#dirt)" opacity="0.85"/>
-
-          <!-- Infield grass diamond -->
-          <polygon points="300,240 390,330 300,420 210,330" fill="#1a3c1a" opacity="0.9"/>
-          <polygon points="300,240 390,330 300,420 210,330" fill="url(#stripes)" opacity="0.6"/>
-
-          <!-- Bases -->
-          <rect x="294" y="234" width="12" height="12" rx="1" fill="#d4c8a0" opacity="0.8" transform="rotate(45 300 240)"/>
-          <rect x="384" y="324" width="12" height="12" rx="1" fill="#d4c8a0" opacity="0.8" transform="rotate(45 390 330)"/>
-          <rect x="294" y="414" width="12" height="12" rx="2" fill="#d4c8a0" opacity="0.9"/>
-          <rect x="204" y="324" width="12" height="12" rx="1" fill="#d4c8a0" opacity="0.8" transform="rotate(45 210 330)"/>
-
-          <!-- Pitcher's mound -->
-          <ellipse cx="300" cy="336" rx="16" ry="14" fill="#3a2a18" opacity="0.9"/>
-          <ellipse cx="300" cy="334" rx="6" ry="5" fill="#4a3525" opacity="0.8"/>
-
-          <!-- Home plate area -->
-          <ellipse cx="300" cy="435" rx="22" ry="18" fill="#2a1e10" opacity="0.8"/>
-          <polygon points="295,430 305,430 308,436 300,442 292,436" fill="#d4c8a0" opacity="0.7"/>
-
-          <!-- Batter's boxes -->
-          <rect x="278" y="428" width="14" height="18" rx="1" fill="none" stroke="#8a7a5a" stroke-width="1" opacity="0.4"/>
-          <rect x="308" y="428" width="14" height="18" rx="1" fill="none" stroke="#8a7a5a" stroke-width="1" opacity="0.4"/>
-
-          <!-- Position labels on field (subtle) -->
-          <text x="300" y="200" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="rgba(255,255,255,0.12)" letter-spacing="3">CENTER FIELD</text>
-          <text x="90" y="200" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="rgba(255,255,255,0.1)" letter-spacing="2">LEFT</text>
-          <text x="510" y="200" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="rgba(255,255,255,0.1)" letter-spacing="2">RIGHT</text>
-        </svg>
-
-        <!-- Position slots layer -->
-        <div class="positions-layer" id="cpos"></div>
-      </div>
-    </div>
-
-    <!-- ROTATION -->
-    <div class="panel">
-      <div class="ph">
-        <span class="ph-title ph-tc">Starting Rotation</span>
-      </div>
-      <div class="pb-sm" id="crot">
-        <div class="ld"><div class="spinner"></div><span class="ld-txt">Loading...</span></div>
-      </div>
-    </div>
-
-    <!-- BULLPEN -->
-    <div class="panel">
-      <div class="ph">
-        <span class="ph-title ph-tc">Bullpen</span>
-      </div>
-      <div class="pb-sm" id="cbull">
-        <div class="ld"><div class="spinner"></div><span class="ld-txt">Loading...</span></div>
-      </div>
-    </div>
-
+  <!-- TEAM STATS BAR -->
+  <div class="sbar" style="grid-template-columns:repeat(8,1fr)" id="cstats">
+    <div class="sbox"><div class="sval" style="color:var(--cr)" id="cs-w">—</div><div class="slbl">W</div></div>
+    <div class="sbox"><div class="sval" id="cs-l">—</div><div class="slbl">L</div></div>
+    <div class="sbox"><div class="sval" id="cs-avg">—</div><div class="slbl">Team AVG</div></div>
+    <div class="sbox"><div class="sval" id="cs-era">—</div><div class="slbl">Team ERA</div></div>
+    <div class="sbox"><div class="sval" id="cs-hr">—</div><div class="slbl">HR</div></div>
+    <div class="sbox"><div class="sval" id="cs-sb">—</div><div class="slbl">SB</div></div>
+    <div class="sbox"><div class="sval" id="cs-ops">—</div><div class="slbl">OPS</div></div>
+    <div class="sbox"><div class="sval" id="cs-rs">—</div><div class="slbl">Runs</div></div>
   </div>
 
-  <!-- ROW 2: Prospects full width -->
-  <div class="panel" style="margin-bottom:16px">
-    <div class="ph">
-      <span class="ph-title ph-tc">Cardinals Prospects — MLB Pipeline</span>
-      <span class="ph-sub">Top 30 · † = MLB Top 100</span>
-    </div>
-    <div style="overflow-x:auto;max-height:440px;overflow-y:auto">
-      <table class="pros-table" id="cpros"></table>
+  <!-- STANDINGS + SCHEDULE -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+    <div class="pnl"><div class="pnl-h"><span class="pnl-t ptc">NL Central Standings</span><span class="pnl-s">2026</span></div><div id="cstand"><div class="empty">Loading...</div></div></div>
+    <div class="pnl"><div class="pnl-h"><span class="pnl-t ptc">Upcoming Schedule</span><span class="pnl-s">Next 7 games</span></div><div id="csched"><div class="empty">Loading...</div></div></div>
+  </div>
+
+  <!-- FIELD -->
+  <div class="pnl" style="margin-bottom:16px">
+    <div class="pnl-h"><span class="pnl-t ptc">Projected Starting Lineup</span><span class="pnl-s">Click player for stats & links · Season opens Mar 26</span></div>
+    <div class="field" id="cfield">
+      <svg viewBox="0 0 600 520" preserveAspectRatio="xMidYMid meet">
+        <!-- Outfield grass -->
+        <path d="M 300,30 Q 540,30 570,280 L 530,330 Q 300,140 70,330 L 30,280 Q 60,30 300,30 Z" fill="#1b6b14"/>
+        <path d="M 300,30 Q 540,30 570,280 L 530,330 Q 300,140 70,330 L 30,280 Q 60,30 300,30 Z" fill="url(#mow)" opacity=".5"/>
+        <!-- Warning track -->
+        <path d="M 300,30 Q 540,30 570,280 L 530,330 Q 300,140 70,330 L 30,280 Q 60,30 300,30 Z" stroke="#6a4a25" stroke-width="16" fill="none"/>
+        <!-- Outfield wall -->
+        <path d="M 300,30 Q 540,30 570,280" stroke="#8a0010" stroke-width="4" fill="none"/>
+        <path d="M 300,30 Q 60,30 30,280" stroke="#8a0010" stroke-width="4" fill="none"/>
+        <!-- Infield grass -->
+        <path d="M 70,330 Q 300,140 530,330 L 530,430 Q 300,310 70,430 Z" fill="#1e7818"/>
+        <!-- Infield dirt -->
+        <ellipse cx="300" cy="400" rx="160" ry="120" fill="#5c3015"/>
+        <!-- Infield grass cutout -->
+        <polygon points="300,280 395,370 300,460 205,370" fill="#1a7216"/>
+        <!-- Base paths -->
+        <line x1="300" y1="460" x2="395" y2="370" stroke="#4a2510" stroke-width="8"/>
+        <line x1="300" y1="460" x2="205" y2="370" stroke="#4a2510" stroke-width="8"/>
+        <line x1="300" y1="280" x2="395" y2="370" stroke="#4a2510" stroke-width="8"/>
+        <line x1="300" y1="280" x2="205" y2="370" stroke="#4a2510" stroke-width="8"/>
+        <!-- Foul lines -->
+        <line x1="300" y1="480" x2="30" y2="280" stroke="#d4c880" stroke-width="1.5" opacity=".4"/>
+        <line x1="300" y1="480" x2="570" y2="280" stroke="#d4c880" stroke-width="1.5" opacity=".4"/>
+        <!-- Bases -->
+        <rect x="293" y="273" width="14" height="14" rx="2" fill="#e8ddb0" transform="rotate(45 300 280)"/>
+        <rect x="388" y="363" width="14" height="14" rx="2" fill="#e8ddb0" transform="rotate(45 395 370)"/>
+        <rect x="198" y="363" width="14" height="14" rx="2" fill="#e8ddb0" transform="rotate(45 205 370)"/>
+        <polygon points="296,475 304,475 307,480 300,485 293,480" fill="#e8ddb0"/>
+        <!-- Mound -->
+        <ellipse cx="300" cy="380" rx="18" ry="14" fill="#6a3818"/>
+        <rect x="296" y="377" width="8" height="3" rx="1" fill="#e0d0a0" opacity=".7"/>
+        <defs><pattern id="mow" patternUnits="userSpaceOnUse" width="20" height="520"><rect width="10" height="520" fill="rgba(255,255,255,.04)"/></pattern></defs>
+      </svg>
     </div>
   </div>
 
-  <!-- ROW 3: News -->
-  <div class="panel">
-    <div class="ph">
-      <span class="ph-title ph-tc">Cardinals News</span>
-      <span class="ph-sub">Google News RSS · Click to read</span>
-    </div>
-    <div class="pb" id="cnews">
-      <div class="ld"><div class="spinner"></div><span class="ld-txt">Fetching news...</span></div>
-    </div>
+  <!-- ROTATION + BULLPEN -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+    <div class="pnl"><div class="pnl-h"><span class="pnl-t ptc">Starting Rotation</span></div><div id="crot" style="padding:4px"></div></div>
+    <div class="pnl"><div class="pnl-h"><span class="pnl-t ptc">Bullpen</span></div><div id="cbull" style="padding:4px"></div></div>
   </div>
 
+  <!-- INJURIES + TRANSACTIONS -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+    <div class="pnl"><div class="pnl-h"><span class="pnl-t ptc">Injured List</span><span class="pnl-s">Active IL stints</span></div><div id="cinj" style="max-height:240px;overflow-y:auto"><div class="empty">Loading...</div></div></div>
+    <div class="pnl"><div class="pnl-h"><span class="pnl-t ptc">Recent Transactions</span><span class="pnl-s">Last 30 days</span></div><div id="ctx" style="max-height:240px;overflow-y:auto"><div class="empty">Loading...</div></div></div>
+  </div>
+
+  <!-- HEADLINES -->
+  <div class="pnl" style="margin-bottom:16px">
+    <div class="pnl-h"><span class="pnl-t ptc">Cardinals Headlines</span><span class="pnl-s">via ESPN · Click to read</span></div>
+    <div class="hl-grid" id="chl"><div class="empty" style="grid-column:1/-1">Loading headlines...</div></div>
+  </div>
+
+  <!-- PROSPECTS -->
+  <div class="pnl" style="margin-bottom:16px">
+    <div class="pnl-h"><span class="pnl-t ptc">Top Prospects — MLB Pipeline 2026</span><span class="pnl-s">† = Top 100 overall · Click for links</span></div>
+    <div style="overflow-x:auto;max-height:460px;overflow-y:auto"><table class="ptbl" id="cpros"></table></div>
+  </div>
+
+  <!-- NEWS LINKS -->
+  <div class="pnl">
+    <div class="pnl-h"><span class="pnl-t ptc">Cardinals News & Resources</span></div>
+    <div id="cnews"></div>
+  </div>
 </section>
 
-<!-- ══════════════════════════════════════════
-     BLUES
-══════════════════════════════════════════ -->
+<!-- ═══ BLUES ═══ -->
 <section id="sb" class="sec">
-
-  <div class="sec-hdr">
-    <div class="sec-hdr-l">
-      <img class="team-logo" src="https://www-league.nhlstatic.com/images/logos/teams-current-primary-light/19.svg"
-           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" alt="STL">
-      <div class="team-logo-placeholder tlp-b" style="display:none">STL</div>
-      <div>
-        <div class="sec-title" style="color:var(--bg-gold)">St. Louis Blues</div>
-        <div class="sec-sub">2025–26 Roster · Lines · Draft · Prospects</div>
-      </div>
+  <div class="shdr">
+    <div class="shdr-l">
+      <img class="tlogo" src="https://assets.nhle.com/logos/nhl/svg/STL_light.svg" alt="STL" onerror="this.style.display='none'">
+      <div><div class="stitle" style="color:var(--gold)">St. Louis Blues</div><div class="ssub">2025–26 · Post-Deadline · Jim Montgomery</div></div>
     </div>
-    <div class="sec-hdr-r">
-      <div class="record-pill rp-b" id="blues-rec">— — —</div>
-      <a class="standings-btn" href="https://www.nhl.com/standings" target="_blank" rel="noopener">
-        ↗ Standings
-      </a>
+    <div class="shdr-r">
+      <div class="rec rec-b" id="brec">Loading...</div>
+      <a class="sbtn" href="https://www.nhl.com/standings" target="_blank">↗ Standings</a>
+      <a class="sbtn" href="https://puckpedia.com/team/st-louis-blues" target="_blank">↗ PuckPedia</a>
     </div>
   </div>
 
-  <div class="blues-grid">
-    <div class="blues-l">
-
-      <!-- FORWARD LINES -->
-      <div class="panel">
-        <div class="ph">
-          <span class="ph-title ph-tb">Forward Lines</span>
-          <span class="ph-sub">Click player for stats</span>
-        </div>
-        <div class="pb-sm" id="bfwd">
-          <div class="ld"><div class="spinner spinner-b"></div><span class="ld-txt">Loading...</span></div>
-        </div>
-      </div>
-
-      <!-- DEFENSIVE PAIRINGS -->
-      <div class="panel">
-        <div class="ph"><span class="ph-title ph-tb">Defensive Pairings</span></div>
-        <div class="pb-sm" id="bdef">
-          <div class="ld"><div class="spinner spinner-b"></div><span class="ld-txt">Loading...</span></div>
-        </div>
-      </div>
-
-      <!-- GOALIES -->
-      <div class="panel">
-        <div class="ph"><span class="ph-title ph-tb">Goalie Tandem</span></div>
-        <div class="pb-sm" id="bgoal">
-          <div class="ld"><div class="spinner spinner-b"></div><span class="ld-txt">Loading...</span></div>
-        </div>
-      </div>
-
-      <!-- HEALTHY SCRATCHES -->
-      <div class="panel">
-        <div class="ph"><span class="ph-title ph-tb">Healthy Scratches</span></div>
-        <div class="pb-sm" id="bscr">
-          <div class="ld"><div class="spinner spinner-b"></div><span class="ld-txt">Loading...</span></div>
-        </div>
-      </div>
-
-      <!-- BLUES PROSPECTS -->
-      <div class="panel">
-        <div class="ph">
-          <span class="ph-title ph-tb">Blues Prospects — All Leagues</span>
-          <span class="ph-sub">Pre-draft rankings · 2026</span>
-        </div>
-        <div style="overflow-x:auto;max-height:360px;overflow-y:auto">
-          <table class="bpros-table" id="bpros"></table>
-        </div>
-      </div>
-
-      <!-- BLUES NEWS -->
-      <div class="panel">
-        <div class="ph">
-          <span class="ph-title ph-tb">Blues News</span>
-          <span class="ph-sub">Google News RSS · Click to read</span>
-        </div>
-        <div class="pb" id="bnews">
-          <div class="ld"><div class="spinner spinner-b"></div><span class="ld-txt">Fetching...</span></div>
-        </div>
-      </div>
-
-    </div>
-
-    <div class="blues-r">
-
-      <!-- TEAM STATS -->
-      <div class="panel">
-        <div class="ph"><span class="ph-title ph-tb">Team Stats</span></div>
-        <div class="pb" id="bstats">
-          <div class="ld"><div class="spinner spinner-b"></div><span class="ld-txt">Loading...</span></div>
-        </div>
-      </div>
-
-      <!-- LAST 5 GAMES -->
-      <div class="panel">
-        <div class="ph"><span class="ph-title ph-tb">Last 5 Games</span></div>
-        <div id="blast5">
-          <div class="ld"><div class="spinner spinner-b"></div><span class="ld-txt">Loading...</span></div>
-        </div>
-      </div>
-
-      <!-- 2026 DRAFT PICKS — SCOUTING VIEW -->
-      <div class="panel">
-        <div class="ph">
-          <span class="ph-title ph-tb">2026 NHL Draft — Pick Inventory</span>
-          <span class="ph-sub">Post-deadline · Hardcoded</span>
-        </div>
-        <div class="pb-sm" id="bdraft">
-          <!-- Rendered by JS -->
-        </div>
-      </div>
-
-    </div>
+  <!-- STATS BAR -->
+  <div class="sbar" style="grid-template-columns:repeat(8,1fr)" id="bstats">
+    <div class="sbox"><div class="sval" style="color:var(--gold)" id="bs-w">—</div><div class="slbl">W</div></div>
+    <div class="sbox"><div class="sval" id="bs-l">—</div><div class="slbl">L</div></div>
+    <div class="sbox"><div class="sval" id="bs-otl">—</div><div class="slbl">OTL</div></div>
+    <div class="sbox"><div class="sval" id="bs-pts">—</div><div class="slbl">PTS</div></div>
+    <div class="sbox"><div class="sval" id="bs-gf">—</div><div class="slbl">GF</div></div>
+    <div class="sbox"><div class="sval" id="bs-ga">—</div><div class="slbl">GA</div></div>
+    <div class="sbox"><div class="sval" id="bs-home">—</div><div class="slbl">HOME</div></div>
+    <div class="sbox"><div class="sval" id="bs-away">—</div><div class="slbl">AWAY</div></div>
   </div>
 
+  <!-- BLUES STANDINGS + SCHEDULE -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+    <div class="pnl"><div class="pnl-h"><span class="pnl-t ptb">Central Division Standings</span></div><div id="bstand"><div class="empty">Loading...</div></div></div>
+    <div class="pnl"><div class="pnl-h"><span class="pnl-t ptb">Upcoming Schedule</span><span class="pnl-s">Next 5 games</span></div><div id="bsched"><div class="empty">Loading...</div></div></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 280px;gap:16px">
+    <div>
+      <div class="pnl"><div class="pnl-h"><span class="pnl-t ptb">Forward Lines — Post-Deadline</span><span class="pnl-s">via DailyFaceoff · Mar 7</span></div><div style="padding:0 6px" id="bfwd"></div></div>
+      <div class="pnl"><div class="pnl-h"><span class="pnl-t ptb">Defensive Pairings</span><span class="pnl-s">Faulk → DET · Parayko returned Mar 10</span></div><div style="padding:0 6px" id="bdef"></div></div>
+      <div class="pnl"><div class="pnl-h"><span class="pnl-t ptb">Goalies</span></div><div id="bgoal"></div></div>
+
+      <!-- BLUES HEADLINES -->
+      <div class="pnl">
+        <div class="pnl-h"><span class="pnl-t ptb">Blues Headlines</span><span class="pnl-s">via ESPN · Click to read</span></div>
+        <div class="hl-grid" id="bhl"><div class="empty" style="grid-column:1/-1">Loading headlines...</div></div>
+      </div>
+
+      <div class="pnl">
+        <div class="pnl-h"><span class="pnl-t ptb">Blues Prospects</span><span class="pnl-s"><a href="https://www.eliteprospects.com/team/74/st-louis-blues/in-the-system" target="_blank" style="color:var(--gold);text-decoration:none">EP ↗</a></span></div>
+        <div style="overflow-x:auto;max-height:360px;overflow-y:auto"><table class="ptbl" id="bpros"></table></div>
+      </div>
+      <div class="pnl"><div class="pnl-h"><span class="pnl-t ptb">Blues News & Resources</span></div><div id="bnews"></div></div>
+    </div>
+    <div>
+      <div class="pnl"><div class="pnl-h"><span class="pnl-t ptb">Last 5 Games</span></div><div id="blast5"><div class="empty">Loading...</div></div></div>
+      <div class="pnl">
+        <div class="pnl-h"><span class="pnl-t ptb">2026 Draft Picks</span><span class="pnl-s"><a href="https://www.tankathon.com/nhl/mock_draft" target="_blank" style="color:var(--gold);text-decoration:none">Mock ↗</a></span></div>
+        <div style="padding:8px" id="bdraft"></div>
+      </div>
+    </div>
+  </div>
 </section>
-
 </main>
 
 <!-- POPUP -->
-<div class="overlay" id="ov" onclick="closeOv(event)">
+<div class="ov" id="ov" onclick="if(event.target===this)this.classList.remove('on')">
   <div class="popup" id="pop"></div>
 </div>
 
 <script>
-// ══════════════════════════════════════════
-// UTILS
-// ══════════════════════════════════════════
+/* ═══ UTILS ═══ */
 function sw(t){
   document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
   document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
-  document.querySelector('.t'+t[0]).classList.add('on');
-  document.getElementById('s'+t[0]).classList.add('on');
+  document.querySelector('.t'+t).classList.add('on');
+  document.getElementById('s'+t).classList.add('on');
+}
+function ini(n){return(n||'').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();}
+
+/* Smart last-name extraction: handles "Jr", "Sr", "II", "III", "IV" suffixes */
+function lastName(n){
+  const parts = (n||'').split(' ');
+  if(parts.length<=1) return n;
+  const suffixes = ['II','III','IV','Jr','Jr.','Sr','Sr.','V'];
+  const last = parts[parts.length-1];
+  if(suffixes.includes(last) && parts.length>2){
+    return parts[parts.length-2]+' '+last;
+  }
+  return last;
 }
 
-function mlbPic(id){ return `https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_213,q_auto:best/v1/people/${id}/headshot/67/current`; }
-function nhlPic(id){ return `https://assets.nhle.com/mugs/nhl/20252026/${id}.png`; }
+function mlbPic(id){if(!id)return'';return`https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_213,q_auto:best/v1/people/${id}/headshot/67/current`;}
+function nhlPic(id){return`https://cms.nhl.bamgrid.com/images/headshots/current/168x168/${id}.jpg`;}
+function openPop(h){document.getElementById('pop').innerHTML=h;document.getElementById('ov').classList.add('on');}
+function closePop(){document.getElementById('ov').classList.remove('on');}
+document.getElementById('ts').textContent=new Date().toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});
 
-function inits(name){ return name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
+/* Direct link helpers — go to actual player pages, not search */
+function savantUrl(id){return id?`https://baseballsavant.mlb.com/savant-player/${id}`:'';}
+function bbrefUrl(id){return id?`https://www.baseball-reference.com/redirect.fcgi?player=1&mlb_ID=${id}`:'';}
+function fgUrl(name){return `https://www.fangraphs.com/players?q=${encodeURIComponent(name)}`;}
+function mlbPlayerUrl(id){return id?`https://www.mlb.com/player/${id}`:'';}
 
-function imgEl(src, alt, cls=''){
-  return `<img src="${src}" alt="${alt}" class="${cls}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`;
-}
-
-function closeOv(e){ if(e.target===document.getElementById('ov')) document.getElementById('ov').classList.remove('on'); }
-function closePopup(){ document.getElementById('ov').classList.remove('on'); }
-
-function openPop(html){
-  document.getElementById('pop').innerHTML = html;
-  document.getElementById('ov').classList.add('on');
-}
-
-document.getElementById('ts').textContent = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-
-// ══════════════════════════════════════════
-// CARDINALS DATA
-// ══════════════════════════════════════════
-const CPOS = [
-  // [pos, label, left%, top%, starter, backup]
-  { p:'LF', l:'LF', x:14, y:16,
-    s:{n:'Lars Nootbaar',   id:669127, stat:'.251 AVG'},
-    b:{n:'Michael Siani',   id:666949} },
-  { p:'CF', l:'CF', x:50, y:6,
-    s:{n:'Victor Scott II', id:694192, stat:'.228 AVG'},
-    b:{n:'Richie Palacios', id:666174} },
-  { p:'RF', l:'RF', x:86, y:16,
-    s:{n:'Jordan Walker',   id:682626, stat:'.261 AVG'},
-    b:{n:'Brendan Donovan', id:680977} },
-  { p:'3B', l:'3B', x:24, y:44,
-    s:{n:'Nolan Arenado',   id:571448, stat:'.272 AVG'},
-    b:{n:'Brandon Crawford',id:543685} },
-  { p:'SS', l:'SS', x:40, y:37,
-    s:{n:'Masyn Winn',      id:686780, stat:'.237 AVG'},
-    b:{n:'José Fermín',     id:672713} },
-  { p:'2B', l:'2B', x:60, y:37,
-    s:{n:'Brendan Donovan', id:680977, stat:'.278 AVG'},
-    b:{n:'César Prieto',    id:694196} },
-  { p:'1B', l:'1B', x:76, y:44,
-    s:{n:'Paul Goldschmidt',id:502671, stat:'.268 AVG'},
-    b:{n:'Luken Baker',     id:669742} },
-  { p:'P',  l:'SP', x:50, y:56,
-    s:{n:'Sonny Gray',      id:543243, stat:'2.87 ERA'},
-    b:{n:'Miles Mikolas',   id:593372} },
-  { p:'C',  l:'C',  x:50, y:72,
-    s:{n:'Willson Contreras',id:575929,stat:'.239 AVG'},
-    b:{n:'Pedro Pagés',     id:683737} },
-  { p:'DH', l:'DH', x:10, y:62,
-    s:{n:'Ivan Herrera',    id:669004, stat:'.255 AVG'},
-    b:{n:'Matt Carpenter',  id:572761} },
+/* ═══ CARDINALS DATA — 2026 Projected Opening Day ═══ */
+const CFIELD = [
+  {pos:'LF', x:16,y:35, name:'Nathan Church',    id:701675, note:'Nootbaar on IL (heels)'},
+  {pos:'CF', x:50,y:18, name:'Victor Scott II',   id:687363, note:'Elite speed, 70 grade'},
+  {pos:'RF', x:84,y:35, name:'Jordan Walker',     id:691023, note:'Former #1 prospect'},
+  {pos:'3B', x:22,y:56, name:'Nolan Gorman',      id:669357, note:'Make-or-break year'},
+  {pos:'SS', x:38,y:48, name:'Masyn Winn',        id:691026, note:'Gold Glove caliber D'},
+  {pos:'2B', x:62,y:48, name:'JJ Wetherholt',     id:802139, note:'Top 5 prospect, NL ROY fav'},
+  {pos:'1B', x:78,y:56, name:'Alec Burleson',     id:676475, note:'Moved from OF to 1B'},
+  {pos:'C',  x:50,y:80, name:'Pedro Pagés',       id:686780, note:'Elite framing, starting C'},
+  {pos:'DH', x:8, y:72, name:'Iván Herrera',      id:671056, note:'.284/.373/.464 in 2025'},
 ];
 
 const CROT = [
-  {n:1, name:'Sonny Gray',       id:543243, role:'ace',  era:'2.87', ip:'164.1'},
-  {n:2, name:'Miles Mikolas',    id:593372, role:'sp',   era:'4.12', ip:'141.0'},
-  {n:3, name:'Steven Matz',      id:571761, role:'sp',   era:'4.56', ip:'98.2'},
-  {n:4, name:'André Pallante',   id:686443, role:'sp',   era:'4.89', ip:'87.1'},
-  {n:5, name:'Erick Fedde',      id:621237, role:'sp',   era:'5.10', ip:'76.0'},
+  {n:1,name:'Matthew Liberatore',id:669461,role:'ace',note:'24yo LHP, likely OD starter'},
+  {n:2,name:'Dustin May',        id:669160,role:'sp', note:'28yo RHP, ex-LAD'},
+  {n:3,name:'Michael McGreevy',  id:700241,role:'sp', note:'24yo RHP, strong rookie \'25'},
+  {n:4,name:'Kyle Leahy',        id:681517,role:'sp', note:'28yo RHP, stretched to start'},
+  {n:5,name:'Andre Pallante',    id:669467,role:'sp', note:'26yo RHP, midseason form'},
 ];
 
 const CBULL = [
-  {name:'Ryan Helsley',     id:664353, role:'cl',  era:'2.02', stat:'38 SV'},
-  {name:'JoJo Romero',      id:669044, role:'su',  era:'3.18', stat:'LHP'},
-  {name:'Keynan Middleton', id:593576, role:'su',  era:'3.44', stat:'67 K'},
-  {name:'Andrew Kittredge', id:573186, role:'su',  era:'3.70', stat:'RHP'},
-  {name:'Chris Roycroft',   id:694052, role:'rp',  era:'4.01', stat:'RHP'},
-  {name:'Giovanny Gallegos',id:602104, role:'rp',  era:'4.22', stat:'RHP'},
-  {name:'Zack Thompson',    id:680694, role:'rp',  era:'4.55', stat:'LHP'},
+  {name:'JoJo Romero',    id:668941,role:'cl',note:'Likely closer'},
+  {name:'Riley O\'Brien', id:676617,role:'su',note:'Setup RHP'},
+  {name:'Ryne Stanek',    id:592773,role:'su',note:'Veteran RHP, mentor role'},
+  {name:'Matt Svanson',   id:694335,role:'su',note:'Setup RHP'},
+  {name:'Gordon Graceffo',id:700669,role:'rp',note:'Swing man / long relief'},
+  {name:'George Soriano', id:666277,role:'rp',note:'RHP'},
+  {name:'Justin Bruihl',  id:677865,role:'rp',note:'LHP'},
+  {name:'Luis Gastelum',  id:703725,role:'rp',note:'RHP, transcendent changeup'},
 ];
 
-// 30 Cardinals prospects — MLB Pipeline order, top100 rank where applicable
+/* MLB Pipeline 2026 Top 30 — from mlb.com/prospects/2026/cardinals (Mar 3, 2026) */
+/* Full list scraped directly from Pipeline page */
 const CPROS = [
-  {r:1,  n:'Tink Hence',           id:694973, pos:'RHP', lvl:'AA',   top100:12,  eta:'2025', stat:'2.61 ERA · 142 K'},
-  {r:2,  n:'Cooper Hjerpe',        id:694174, pos:'LHP', lvl:'AA',   top100:38,  eta:'2025', stat:'3.14 ERA · 128 K'},
-  {r:3,  n:'Moises Ballesteros',   id:701737, pos:'C',   lvl:'A+',   top100:45,  eta:'2026', stat:'.298 AVG · 12 HR'},
-  {r:4,  n:'Alec Burleson',        id:682988, pos:'OF',  lvl:'MLB',  top100:null,eta:'2025', stat:'.281 AVG · 18 HR'},
-  {r:5,  n:'Michael McGreevy',     id:678592, pos:'RHP', lvl:'AAA',  top100:null,eta:'2025', stat:'3.77 ERA · 97 K'},
-  {r:6,  n:'Gordon Graceffo',      id:694521, pos:'RHP', lvl:'AAA',  top100:null,eta:'2025', stat:'3.90 ERA · 108 K'},
-  {r:7,  n:'Inohan Paniagua',      id:701738, pos:'RHP', lvl:'A',    top100:null,eta:'2027', stat:'2.88 ERA · 94 K'},
-  {r:8,  n:'Sem Robberse',         id:678459, pos:'RHP', lvl:'AA',   top100:null,eta:'2026', stat:'3.44 ERA · 87 K'},
-  {r:9,  n:'Victor Scott II',      id:694192, pos:'OF',  lvl:'MLB',  top100:null,eta:'2025', stat:'.228 AVG · 26 SB'},
-  {r:10, n:'Jordan Walker',        id:682626, pos:'OF/3B',lvl:'MLB', top100:null,eta:'2025', stat:'.261 AVG · 14 HR'},
-  {r:11, n:'Joshua Baez',          id:694531, pos:'OF',  lvl:'A',    top100:null,eta:'2027', stat:'.255 AVG · 10 HR'},
-  {r:12, n:'Masyn Winn',           id:686780, pos:'SS',  lvl:'MLB',  top100:null,eta:'2025', stat:'.237 AVG · 14 HR'},
-  {r:13, n:'Michael Siani',        id:666949, pos:'OF',  lvl:'AAA',  top100:null,eta:'2025', stat:'.260 AVG · 22 SB'},
-  {r:14, n:'César Prieto',         id:694196, pos:'2B',  lvl:'AAA',  top100:null,eta:'2025', stat:'.308 AVG · 5 HR'},
-  {r:15, n:'Pedro Pagés',          id:683737, pos:'C',   lvl:'MLB',  top100:null,eta:'2025', stat:'.238 AVG · 6 HR'},
-  {r:16, n:'Zack Thompson',        id:680694, pos:'LHP', lvl:'MLB',  top100:null,eta:'2025', stat:'4.55 ERA · 71 K'},
-  {r:17, n:'Nathan Church',        id:701803, pos:'OF',  lvl:'A',    top100:null,eta:'2027', stat:'.271 AVG · 8 HR'},
-  {r:18, n:'Ian Bedell',           id:678401, pos:'RHP', lvl:'AA',   top100:null,eta:'2026', stat:'3.60 ERA · 82 K'},
-  {r:19, n:'Luken Baker',          id:669742, pos:'1B',  lvl:'AAA',  top100:null,eta:'2025', stat:'.265 AVG · 22 HR'},
-  {r:20, n:'Jonah Bride',          id:686003, pos:'1B/OF',lvl:'AAA', top100:null,eta:'2025', stat:'.270 AVG · 14 HR'},
-  {r:21, n:'Nolan Gorman',         id:683737, pos:'2B',  lvl:'MLB',  top100:null,eta:'2025', stat:'.228 AVG · 18 HR'},
-  {r:22, n:'Tekoah Roby',          id:694527, pos:'RHP', lvl:'A+',   top100:null,eta:'2027', stat:'3.91 ERA · 76 K'},
-  {r:23, n:'Levi Prater',          id:686437, pos:'LHP', lvl:'AA',   top100:null,eta:'2026', stat:'3.78 ERA · 90 K'},
-  {r:24, n:'Quinn Matthews',       id:694519, pos:'RHP', lvl:'A+',   top100:null,eta:'2026', stat:'3.50 ERA · 88 K'},
-  {r:25, n:'Jose Davila',          id:701729, pos:'SS',  lvl:'R',    top100:null,eta:'2028', stat:'.278 AVG · 8 SB'},
-  {r:26, n:'Alfredo Duno',         id:701730, pos:'OF',  lvl:'R',    top100:null,eta:'2028', stat:'.262 AVG · 12 SB'},
-  {r:27, n:'Guillermo Williamson', id:701731, pos:'LHP', lvl:'R',    top100:null,eta:'2028', stat:'3.22 ERA · 44 K'},
-  {r:28, n:'Ryan Holgate',         id:694522, pos:'OF',  lvl:'A',    top100:null,eta:'2027', stat:'.251 AVG · 9 HR'},
-  {r:29, n:'Matthew Liberatore',   id:669127, pos:'LHP', lvl:'MLB',  top100:null,eta:'2025', stat:'5.10 ERA · 68 K'},
-  {r:30, n:'Tyler Hard',           id:701732, pos:'C',   lvl:'A',    top100:null,eta:'2028', stat:'.244 AVG · 6 HR'},
+  {r:1, n:'JJ Wetherholt',     pos:'INF',  lvl:'AAA',  t100:5,  fv:55,eta:'2026',note:'\'25 MiLB: .306/.421/.510, 17 HR, 23 SB, 109 GP'},
+  {r:2, n:'Liam Doyle',        pos:'LHP',  lvl:'AA',   t100:34, fv:55,eta:'2027',note:'Plus-plus fastball (70 grade), massive upside'},
+  {r:3, n:'Rainiel Rodriguez', pos:'C',    lvl:'A+',   t100:37, fv:55,eta:'2028',note:'\'25: .954 OPS across 3 levels, age 19, 65 power'},
+  {r:4, n:'Joshua Báez',       pos:'OF',   lvl:'AAA',  t100:87, fv:50,eta:'2026',note:'\'25: .287/.384/.500, 20 HR, 54 SB in 117 GP'},
+  {r:5, n:'Jurrangelo Cijntje',pos:'RHP',  lvl:'AA',   t100:91, fv:50,eta:'2026',note:'Via SEA (Donovan trade), former switch-pitcher'},
+  {r:6, n:'Leo Bernal',        pos:'C',    lvl:'AAA',  t100:98, fv:50,eta:'2027',note:'\'25: .247/.332/.394, 13 HR — MiLB Gold Glove C'},
+  {r:7, n:'Quinn Mathews',     pos:'LHP',  lvl:'AAA',  t100:null,fv:50,eta:'2026',note:'Advanced LHP, velo spike this spring'},
+  {r:8, n:'Jimmy Crooks',      pos:'C',    lvl:'AAA',  t100:null,fv:50,eta:'2026',note:'Strong defensive C, MLB debut in \'25'},
+  {r:9, n:'Brandon Clarke',    pos:'LHP',  lvl:'A+',   t100:null,fv:50,eta:'2027',note:'Via BOS (Sonny Gray trade), 70-grade slider'},
+  {r:10,n:'Tekoah Roby',       pos:'RHP',  lvl:'AAA',  t100:null,fv:45,eta:'2027',note:'Best curveball in system (60), plus control'},
+  {r:11,n:'Tanner Franklin',   pos:'RHP',  lvl:'A+',   t100:null,fv:45,eta:'2028',note:'70-grade fastball, high upside arm'},
+  {r:12,n:'Ryan Mitchell',     pos:'OF/SS',lvl:'ROK',  t100:null,fv:45,eta:'2029',note:'2025 2nd round, versatile athlete'},
+  {r:13,n:'Yhoiker Fajardo',   pos:'RHP',  lvl:'A',    t100:null,fv:45,eta:'2028',note:'Via BOS (Contreras trade), age 19'},
+  {r:14,n:'Ixan Henderson',    pos:'LHP',  lvl:'AA',   t100:null,fv:45,eta:'2026',note:'\'25: 2.59 ERA, led Texas League — breakout'},
+  {r:15,n:'Tink Hence',        pos:'RHP',  lvl:'AAA',  t100:null,fv:45,eta:'2026',note:'Returning from TJ, 70-grade changeup'},
 ];
 
-// ══════════════════════════════════════════
-// RENDER CARDINALS POSITIONS
-// ══════════════════════════════════════════
-function renderCPos(){
-  const layer = document.getElementById('cpos');
-  layer.innerHTML = CPOS.map(p=>{
-    const si = inits(p.s.n);
-    const bi = inits(p.b.n);
-    const sData = JSON.stringify(p.s).replace(/"/g,"'");
-    const bData = JSON.stringify(p.b).replace(/"/g,"'");
-    return `
-    <div class="pslot" style="left:${p.x}%;top:${p.y}%" onclick="openCPlayer(${sData})">
-      <span class="pos-lbl">${p.l}</span>
-      <div class="pcard">
-        <div class="pcard-photo">
-          <img src="${mlbPic(p.s.id)}" alt="${p.s.n}" style="width:100%;height:100%;object-fit:cover;object-position:top"
-               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-          <div class="pcard-init" style="display:none">${si}</div>
-        </div>
-        <div class="pcard-info">
-          <div class="pcard-name">${p.s.n.split(' ').slice(-1)[0]}</div>
-          <div class="pcard-stat">${p.s.stat||''}</div>
-        </div>
-      </div>
-      <div class="bslot" onclick="event.stopPropagation();openCPlayer(${bData})">
-        <span class="bslot-arr">↳</span>
-        <span class="bslot-name">${p.b.n.split(' ').slice(-1)[0]}</span>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-// ══════════════════════════════════════════
-// RENDER ROTATION + BULLPEN
-// ══════════════════════════════════════════
-function renderCRot(){
-  document.getElementById('crot').innerHTML = CROT.map((p,i)=>`
-    ${i>0?'<div class="hdiv"></div>':''}
-    <div class="prow" onclick="openCPlayer({n:'${p.name}',id:${p.id}})">
-      <span class="prow-num">${p.n}</span>
-      <div class="prow-photo">
-        <img src="${mlbPic(p.id)}" alt="${p.name}"
-             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-        <span class="prow-init" style="display:none">${inits(p.name)}</span>
-      </div>
-      <div class="prow-info">
-        <div class="prow-name">${p.name}</div>
-        <div class="prow-stat">${p.era} ERA · ${p.ip} IP</div>
-      </div>
-      <span class="rbadge rb-${p.role}">${p.role.toUpperCase()}</span>
-    </div>`).join('');
-}
-
-function renderCBull(){
-  document.getElementById('cbull').innerHTML = CBULL.map((p,i)=>`
-    ${i>0?'<div class="hdiv"></div>':''}
-    <div class="prow" onclick="openCPlayer({n:'${p.name}',id:${p.id}})">
-      <div class="prow-photo">
-        <img src="${mlbPic(p.id)}" alt="${p.name}"
-             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-        <span class="prow-init" style="display:none">${inits(p.name)}</span>
-      </div>
-      <div class="prow-info">
-        <div class="prow-name">${p.name}</div>
-        <div class="prow-stat">${p.era} ERA · ${p.stat}</div>
-      </div>
-      <span class="rbadge rb-${p.role}">${p.role.toUpperCase()}</span>
-    </div>`).join('');
-}
-
-// ══════════════════════════════════════════
-// RENDER 30 PROSPECTS
-// ══════════════════════════════════════════
-function renderCPros(){
-  const el = document.getElementById('cpros');
-  el.innerHTML = `
-    <thead>
-      <tr>
-        <th>Rank</th>
-        <th></th>
-        <th>Name</th>
-        <th>Pos</th>
-        <th>Level</th>
-        <th>Stats</th>
-        <th>ETA</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${CPROS.map(p=>`
-        <tr style="cursor:pointer" onclick="openCPlayer({n:'${p.n}',id:${p.id}})">
-          <td>
-            <span class="pros-rank ${p.r<=3?'top':p.r<=10?'high':''}">#${p.r}</span>
-            ${p.top100?`<br><span class="top100-badge">T100 #${p.top100}</span>`:''}
-          </td>
-          <td>
-            <div class="pros-photo">
-              <img src="${mlbPic(p.id)}" alt="${p.n}"
-                   onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-              <span class="pros-init" style="display:none">${inits(p.n)}</span>
-            </div>
-          </td>
-          <td><div class="pros-name">${p.n}</div></td>
-          <td><span class="pros-pos">${p.pos}</span></td>
-          <td><span class="pros-pos">${p.lvl}</span></td>
-          <td><span class="pros-stats">${p.stat}</span></td>
-          <td><span class="pros-eta">${p.eta}</span></td>
-        </tr>
-      `).join('')}
-    </tbody>`;
-}
-
-// ══════════════════════════════════════════
-// BLUES DATA
-// ══════════════════════════════════════════
+/* ═══ BLUES DATA — POST-DEADLINE (DailyFaceoff Mar 7 + updates) ═══ */
 const BFWD = [
-  {ln:'L1', players:[
-    {n:'Pavel Buchnevich', id:'8478432', pos:'LW', pts:62, toi:'19:14'},
-    {n:'Brayden Schenn',   id:'8476459', pos:'C',  pts:48, toi:'18:42'},
-    {n:'Jordan Kyrou',     id:'8480762', pos:'RW', pts:71, toi:'19:01'},
+  {ln:'L1',p:[
+    {n:'Dylan Holloway',    id:'8483526',num:81,pos:'LW'},
+    {n:'Robert Thomas',     id:'8481543',num:18,pos:'C'},
+    {n:'Jimmy Snuggerud',   id:'8484143',num:21,pos:'RW'},
   ]},
-  {ln:'L2', players:[
-    {n:'Jake Neighbours',  id:'8482699', pos:'LW', pts:39, toi:'16:22'},
-    {n:'Robert Thomas',    id:'8481543', pos:'C',  pts:57, toi:'18:10'},
-    {n:'Alexei Toropchenko',id:'8482104',pos:'RW', pts:22, toi:'14:55'},
+  {ln:'L2',p:[
+    {n:'Jake Neighbours',   id:'8482699',num:63,pos:'LW'},
+    {n:'Pavel Buchnevich',  id:'8478432',num:89,pos:'C'},
+    {n:'Jordan Kyrou',      id:'8480762',num:25,pos:'RW'},
   ]},
-  {ln:'L3', players:[
-    {n:'Oskar Sundqvist',  id:'8476928', pos:'LW', pts:18, toi:'14:10'},
-    {n:'Zach Dean',        id:'8484889', pos:'C',  pts:12, toi:'12:44'},
-    {n:'Mathieu Joseph',   id:'8480768', pos:'RW', pts:21, toi:'13:30'},
+  {ln:'L3',p:[
+    {n:'Pius Suter',        id:'8480459',num:22,pos:'LW'},
+    {n:'Dalibor Dvorsky',   id:'8484889',num:54,pos:'C'},
+    {n:'Jonatan Berggren',  id:'8481704',num:29,pos:'RW'},
   ]},
-  {ln:'L4', players:[
-    {n:'Nathan Walker',    id:'8477353', pos:'LW', pts:10, toi:'10:22'},
-    {n:'Dakota Joshua',    id:'8479394', pos:'C',  pts:14, toi:'11:50'},
-    {n:'Kasperi Kapanen',  id:'8478435', pos:'RW', pts:9,  toi:'10:15'},
+  {ln:'L4',p:[
+    {n:'Alexey Toropchenko',id:'8482104',num:13,pos:'LW'},
+    {n:'Jack Finley',       id:'8483488',num:37,pos:'C'},
+    {n:'Oskar Sundqvist',   id:'8476928',num:70,pos:'RW'},
   ]},
 ];
 
 const BDEF = [
-  {pr:'P1', players:[
-    {n:'Colton Parayko',  id:'8477509', pos:'RD', pts:28, toi:'23:14'},
-    {n:'Justin Faulk',    id:'8476456', pos:'LD', pts:32, toi:'21:58'},
+  {pr:'P1',p:[
+    {n:'Philip Broberg',  id:'8481600',num:6, pos:'LD'},
+    {n:'Logan Mailloux',  id:'8482830',num:23,pos:'RD'},
   ]},
-  {pr:'P2', players:[
-    {n:'Torey Krug',      id:'8476792', pos:'LD', pts:37, toi:'20:11'},
-    {n:'Ryan Suter',      id:'8470594', pos:'RD', pts:14, toi:'18:30'},
+  {pr:'P2',p:[
+    {n:'Colton Parayko',  id:'8476892',num:55,pos:'RD',note:'Back from injury Mar 10'},
+    {n:'Theo Lindstein',  id:'8484890',num:44,pos:'LD',note:'NHL debut Mar 11'},
   ]},
-  {pr:'P3', players:[
-    {n:'Tyler Tucker',    id:'8481699', pos:'RD', pts:12, toi:'16:00'},
-    {n:'Scott Perunovich',id:'8482717', pos:'LD', pts:20, toi:'16:44'},
+  {pr:'P3',p:[
+    {n:'Tyler Tucker',    id:'8482856',num:75,pos:'LD'},
+    {n:'Cam Fowler',      id:'8475764',num:17,pos:'RD'},
   ]},
 ];
 
 const BGOAL = [
-  {n:'Jordan Binnington',id:'8476999', gaa:'2.82', sv:'.904', rec:'28-24-5'},
-  {n:'Joel Hofer',       id:'8482217', gaa:'2.64', sv:'.912', rec:'12-8-2'},
+  {n:'Jordan Binnington',id:'8476412',num:50,stat:'Franchise wins leader'},
+  {n:'Joel Hofer',       id:'8482217',num:30,stat:'2yr extension, strong backup'},
 ];
 
-const BSCR = [
-  {n:'Brandon Saad',    pos:'LW', reason:'Coach\'s Decision'},
-  {n:'Marco Scandella', pos:'LD', reason:'Healthy Scratch'},
-  {n:'Tyler Benson',    pos:'LW', reason:'Healthy Scratch'},
-];
-
-// Blues prospects — all leagues, 2025-26
 const BPROS = [
-  {r:1,  n:'Dalibor Dvorsky',   pos:'C',   lg:'SHL',     gp:42, stat:'18G 32A 50Pts', age:20},
-  {r:2,  n:'Jimmy Snuggerud',   pos:'RW',  lg:'AHL',     gp:52, stat:'22G 30A 52Pts', age:21},
-  {r:3,  n:'Zach Bolduc',       pos:'C',   lg:'AHL/NHL', gp:48, stat:'19G 24A 43Pts', age:21},
-  {r:4,  n:'Jake Neighbours',   pos:'LW',  lg:'NHL',     gp:71, stat:'18G 21A 39Pts', age:22},
-  {r:5,  n:'Zach Dean',         pos:'C',   lg:'NHL',     gp:58, stat:'7G 15A 22Pts',  age:21},
-  {r:6,  n:'Adam Beckman',      pos:'LW',  lg:'AHL',     gp:56, stat:'24G 28A 52Pts', age:22},
-  {r:7,  n:'Scott Perunovich',  pos:'LD',  lg:'NHL',     gp:49, stat:'6G 20A 26Pts',  age:23},
-  {r:8,  n:'Tyler Tucker',      pos:'RD',  lg:'NHL/AHL', gp:44, stat:'4G 12A 16Pts',  age:23},
-  {r:9,  n:'Dylan Peterson',    pos:'C',   lg:'NCAA',    gp:36, stat:'14G 18A 32Pts', age:20},
-  {r:10, n:'Spencer Gill',      pos:'RW',  lg:'OHL',     gp:55, stat:'30G 42A 72Pts', age:19},
-  {r:11, n:'Nathan Walker',     pos:'LW',  lg:'NHL',     gp:48, stat:'8G 10A 18Pts',  age:29},
-  {r:12, n:'Mikhail Abramov',   pos:'C',   lg:'AHL',     gp:60, stat:'18G 32A 50Pts', age:23},
+  {r:1, n:'Justin Carbonneau',  pos:'RW', lg:'QMJHL',   age:18,note:'50G 27A 77Pts in 55 GP — elite scorer'},
+  {r:2, n:'Adam Jiříček',       pos:'D',  lg:'OHL',      age:18,note:'17G 35A 52Pts in 50 GP — top D prospect'},
+  {r:3, n:'Lukas Fischer',      pos:'D',  lg:'OHL',      age:20,note:'7G 35A 42Pts in 59 GP (Sarnia/Soo)'},
+  {r:4, n:'Calle Rosén',        pos:'D',  lg:'AHL',      age:31,note:'8G 25A 33Pts (Springfield/Hershey)'},
+  {r:5, n:'Adam Jecho',         pos:'C/RW',lg:'WHL',     age:19,note:'8G 24A 32Pts in 42 GP — Edmonton'},
+  {r:6, n:'William McIsaac',    pos:'D',  lg:'WHL',      age:20,note:'7G 22A 29Pts in 60 GP — Spokane'},
+  {r:7, n:'Aleksanteri Kaskimäki',pos:'C',lg:'AHL',      age:21,note:'13G 14A 27Pts — Springfield'},
+  {r:8, n:'Juraj Pekarcik',     pos:'W/C',lg:'AHL',      age:21,note:'7G 20A 27Pts — Springfield'},
+  {r:9, n:'Matvei Korotky',     pos:'C',  lg:'KHL',      age:19,note:'14G 11A 25Pts — SKA St. Petersburg'},
+  {r:10,n:'Dmitri Buchelnikov', pos:'LW', lg:'KHL',      age:21,note:'13G 10A 23Pts — CSKA',acq:true},
+  {r:11,n:'Dylan Peterson',     pos:'C/RW',lg:'AHL',     age:21,note:'8G 10A 18Pts — Springfield'},
+  {r:12,n:'Jakub Stancl',       pos:'LW', lg:'AHL',      age:20,note:'9G 8A 17Pts — Springfield'},
+  {r:13,n:'Marcus Gidlöf',      pos:'G',  lg:'SHL',      age:20,note:'Goalie prospect via NYI (Schenn trade)',acq:true},
 ];
 
-// 2026 Blues Draft Picks (post-deadline, hardcoded)
-// NOTE: Update after any trades — structure ready for live data swap
 const BDRAFT = [
-  {round:1, pick:'~24th', origin:'OWN', note:'Own pick — lottery position TBD',
-   prospects:[
-     {rank:1, n:'Matthew Schaefer', pos:'LD', age:17, nat:'CAN', lg:'OHL',
-      grade:'Elite LD prospect. Exceptional skating, two-way game, high hockey IQ.',
-      grades:[{l:'Skating',g:'elite'},{l:'Defense',g:'elite'},{l:'Offense',g:'plus'},{l:'Compete',g:'plus'}]},
-     {rank:2, n:'Porter Martone',   pos:'RW', age:17, nat:'CAN', lg:'OHL',
-      grade:'Power forward with elite hands, strong net-front presence. High-end offensive upside.',
-      grades:[{l:'Hands',g:'elite'},{l:'Compete',g:'elite'},{l:'Skating',g:'avg'},{l:'Shot',g:'plus'}]},
-     {rank:3, n:'Caleb Desnoyers',  pos:'C',  age:17, nat:'CAN', lg:'QMJHL',
-      grade:'Two-way center, excellent face-off work, consistent producer in QMJHL.',
-      grades:[{l:'Two-Way',g:'plus'},{l:'FO',g:'plus'},{l:'Compete',g:'elite'},{l:'Speed',g:'avg'}]},
-   ]},
-  {round:2, pick:'~56th', origin:'OWN', note:'Own pick',
-   prospects:[
-     {rank:1, n:'Anton Frondell',   pos:'C',  age:17, nat:'SWE', lg:'SHL-J',
-      grade:'Smart center with excellent positioning and a strong two-way game.',
-      grades:[{l:'Hockey IQ',g:'elite'},{l:'Two-Way',g:'plus'},{l:'Skating',g:'avg'}]},
-     {rank:2, n:'Luca Pinelli',     pos:'C',  age:17, nat:'CAN', lg:'OHL',
-      grade:'Shifty playmaker with exceptional vision. Projects as a power play specialist.',
-      grades:[{l:'Vision',g:'elite'},{l:'Hands',g:'plus'},{l:'Speed',g:'plus'}]},
-     {rank:3, n:'Jakub Dvoracek',   pos:'RD', age:17, nat:'CZE', lg:'Extraliga-J',
-      grade:'Mobile defenseman with a strong offensive zone game from the blue line.',
-      grades:[{l:'Shot',g:'plus'},{l:'Mobility',g:'plus'},{l:'Defense',g:'avg'}]},
-   ]},
-  {round:3, pick:'~88th', origin:'OWN', note:'Own pick',
-   prospects:[
-     {rank:1, n:'Braeden Cootes',   pos:'C',  age:17, nat:'CAN', lg:'WHL',
-      grade:'Reliable two-way center, strong defensively, good on the penalty kill.',
-      grades:[{l:'Defensive',g:'plus'},{l:'PK',g:'plus'},{l:'Offense',g:'avg'}]},
-     {rank:2, n:'Tomas Galvas',     pos:'LD', age:17, nat:'CZE', lg:'Extraliga-J',
-      grade:'Smooth skating defenseman, keeps it simple, projects as a third-pair NHL type.',
-      grades:[{l:'Skating',g:'plus'},{l:'Poise',g:'plus'},{l:'Offense',g:'avg'}]},
-     {rank:3, n:'Sam Dickinson',    pos:'LD', age:17, nat:'CAN', lg:'OHL',
-      grade:'Big-bodied d-man, plays a physical game, shot-blocking specialist.',
-      grades:[{l:'Physical',g:'elite'},{l,'Defense',g:'plus'},{l:'Offense',g:'avg'}]},
-   ]},
-  {round:4, pick:'~120th', origin:'OWN', note:'Own pick',
-   prospects:[
-     {rank:1, n:'Ondrej Beres',     pos:'RW', age:17, nat:'SVK', lg:'USHL',
-      grade:'Skilled Slovak winger producing well in USHL. Strong skater with offensive upside.',
-      grades:[{l:'Skating',g:'plus'},{l:'Hands',g:'plus'},{l:'Compete',g:'avg'}]},
-     {rank:2, n:'Markus Nordlund',  pos:'C',  age:17, nat:'SWE', lg:'SHL-J',
-      grade:'Swedish center with good instincts and consistent work ethic.',
-      grades:[{l:'Hockey IQ',g:'plus'},{l:'Compete',g:'plus'},{l:'Speed',g:'avg'}]},
-     {rank:3, n:'Tanner Kozun',     pos:'RW', age:17, nat:'CAN', lg:'WHL',
-      grade:'High-energy winger who wins puck battles and creates off the rush.',
-      grades:[{l:'Compete',g:'elite'},{l:'Speed',g:'plus'},{l:'Hands',g:'avg'}]},
-   ]},
+  {round:'1st Round',pick:'Lottery (Own)',note:'Blues last in Central — projected top-5 lottery pick',origin:'OWN'},
+  {round:'1st Round',pick:'Via Colorado (from NYI/Schenn trade)',note:'Avs are Cup contender — projects late 1st',origin:'VIA COL → NYI'},
+  {round:'1st Round',pick:'Via Detroit (Faulk trade)',note:'Red Wings pushing for playoffs — projects mid-1st',origin:'VIA DET'},
+  {round:'3rd Round',pick:'Via NJD (from Schenn trade)',note:'Additional pick acquired in Schenn deal',origin:'VIA NYI'},
+  {round:'3rd Round',pick:'Via Detroit (Faulk trade)',note:'Additional pick from Faulk deal',origin:'VIA DET'},
 ];
 
-// Fix typo in data
-BDRAFT[2].prospects[2].grades[1] = {l:'Defense',g:'plus'};
-
-// ══════════════════════════════════════════
-// RENDER BLUES
-// ══════════════════════════════════════════
-function renderBFwd(){
-  document.getElementById('bfwd').innerHTML = BFWD.map(line=>`
-    <div class="line-section">
-      <div class="line-row">
-        <span class="line-lbl">${line.ln}</span>
-        <div class="line-players">
-          ${line.players.map(p=>`
-            <div class="lp" onclick="openBPlayer(${JSON.stringify(p).replace(/"/g,"'")})">
-              <div class="lp-photo">
-                <img src="${nhlPic(p.id)}" alt="${p.n}"
-                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-                <span class="lp-init" style="display:none">${inits(p.n)}</span>
-              </div>
-              <div class="lp-name">${p.n.split(' ').slice(-1)[0]}</div>
-              <div class="lp-stat">${p.pts}pts</div>
-            </div>`).join('')}
-        </div>
+/* ═══ RENDER — FIELD ═══ */
+function renderField(){
+  const el = document.getElementById('cfield');
+  CFIELD.forEach((p,i) => {
+    const d = document.createElement('div');
+    d.className = 'pos';
+    d.style.cssText = `left:${p.x}%;top:${p.y}%`;
+    d.onclick = () => openCPlayer(i);
+    const last = lastName(p.name);
+    const pic = p.id ? mlbPic(p.id) : '';
+    d.innerHTML = `
+      <span class="pos-lbl">${p.pos}</span>
+      <div class="pos-circ">
+        ${pic ? `<img src="${pic}" alt="${p.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <span class="pos-init" style="display:none">${ini(p.name)}</span>` : `<span class="pos-init">${ini(p.name)}</span>`}
       </div>
-      <div class="hdiv"></div>
+      <span class="pos-nm">${last}</span>`;
+    el.appendChild(d);
+  });
+}
+
+/* ═══ RENDER — ROTATION + BULLPEN ═══ */
+function renderCRot(){
+  document.getElementById('crot').innerHTML = CROT.map((p,i) => {
+    const pic = p.id ? mlbPic(p.id) : '';
+    return `${i?'<div class="hdiv"></div>':''}
+    <div class="prow" onclick="openCPlayer(-1,${i},'rot')">
+      <span class="prow-n">${p.n}</span>
+      <div class="prow-pic">${pic ? `<img src="${pic}" alt="${p.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><span class="prow-i" style="display:none">${ini(p.name)}</span>` : `<span class="prow-i">${ini(p.name)}</span>`}</div>
+      <div class="prow-info"><div class="prow-name">${p.name}</div><div class="prow-stat">${p.note}</div></div>
+      <span class="badge b-${p.role}">${p.role.toUpperCase()}</span>
+    </div>`;}).join('');
+}
+
+function renderCBull(){
+  document.getElementById('cbull').innerHTML = CBULL.map((p,i) => {
+    const pic = p.id ? mlbPic(p.id) : '';
+    return `${i?'<div class="hdiv"></div>':''}
+    <div class="prow" onclick="openCPlayer(-1,${i},'bull')">
+      <div class="prow-pic">${pic ? `<img src="${pic}" alt="${p.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><span class="prow-i" style="display:none">${ini(p.name)}</span>` : `<span class="prow-i">${ini(p.name)}</span>`}</div>
+      <div class="prow-info"><div class="prow-name">${p.name}</div><div class="prow-stat">${p.note}</div></div>
+      <span class="badge b-${p.role}">${p.role.toUpperCase()}</span>
+    </div>`;}).join('');
+}
+
+/* ═══ RENDER — PROSPECTS ═══ */
+function renderCPros(){
+  document.getElementById('cpros').innerHTML = `
+    <thead><tr><th>Rk</th><th>Name</th><th>Pos</th><th>Level</th><th>ETA</th><th>Notes</th></tr></thead>
+    <tbody>${CPROS.map(p=>`
+      <tr onclick="openCProspect(${p.r-1})">
+        <td><div class="prk ${p.r<=3?'top':p.r<=6?'hi':''}">#${p.r}</div>${p.t100?`<span class="t100">T100 #${p.t100}</span>`:''}</td>
+        <td><span class="pnm">${p.n}</span></td>
+        <td><span class="ppos">${p.pos}</span></td>
+        <td><span class="ppos">${p.lvl}</span></td>
+        <td><span class="eta">${p.eta}</span></td>
+        <td><span style="font-size:12px;color:var(--t2)">${p.note}</span></td>
+      </tr>`).join('')}</tbody>`;
+}
+
+/* ═══ RENDER — NEWS LINKS ═══ */
+function renderCNews(){
+  const links = [
+    {src:'MLB.com',     url:'https://www.mlb.com/cardinals/news',      t:'Cardinals News & Transactions'},
+    {src:'Viva El Birdos',url:'https://www.vivaelbirdos.com/',         t:'Cardinals Analysis & Commentary'},
+    {src:'FanGraphs',   url:'https://www.fangraphs.com/roster-resource/depth-charts/cardinals',t:'Depth Chart & Projections'},
+    {src:'Baseball Savant',url:'https://baseballsavant.mlb.com/team/138',t:'Statcast Data & Metrics'},
+    {src:'Pipeline',    url:'https://www.mlb.com/prospects/cardinals',  t:'Cardinals Top 30 Prospects'},
+    {src:'BBRef',       url:'https://www.baseball-reference.com/teams/STL/2026.html',t:'2026 Season Stats & Results'},
+  ];
+  document.getElementById('cnews').innerHTML = links.map(l =>
+    `<a class="nlink" href="${l.url}" target="_blank"><span class="nsrc">${l.src}</span><span class="nhl-t">${l.t}</span><span style="font-family:var(--mono);font-size:9px;color:var(--cr)">↗</span></a>`
+  ).join('');
+}
+
+function renderBNews(){
+  const links = [
+    {src:'NHL.com',     url:'https://www.nhl.com/blues/',              t:'Blues News & Video'},
+    {src:'DailyFaceoff',url:'https://www.dailyfaceoff.com/teams/st-louis-blues/line-combinations',t:'Current Line Combinations'},
+    {src:'PuckPedia',   url:'https://puckpedia.com/team/st-louis-blues',t:'Cap Hits & Contract Details'},
+    {src:'EliteProspects',url:'https://www.eliteprospects.com/team/74/st-louis-blues',t:'Full Roster & Prospect Pipeline'},
+    {src:'Nat Stat Trick',url:'https://www.naturalstattrick.com/teamtable.php',t:'Advanced Analytics (5v5)'},
+    {src:'Hockey-Ref',  url:'https://www.hockey-reference.com/teams/STL/2026.html',t:'2025-26 Season Stats'},
+  ];
+  document.getElementById('bnews').innerHTML = links.map(l =>
+    `<a class="nlink" href="${l.url}" target="_blank"><span class="nsrc">${l.src}</span><span class="nhl-t">${l.t}</span><span style="font-family:var(--mono);font-size:9px;color:var(--gold)">↗</span></a>`
+  ).join('');
+}
+
+/* ═══ RENDER — BLUES LINES ═══ */
+function renderBFwd(){
+  document.getElementById('bfwd').innerHTML = BFWD.map(line =>
+    `<div class="lcard">
+      <div class="lnum">${line.ln}</div>
+      <div class="lplayers">${line.p.map((p,pi) =>
+        `<div class="lslot" onclick="openBPlayer('${p.id}','${p.n}','${p.pos}')">
+          <span class="lpos">${p.pos}</span>
+          <div class="lcirc"><img src="${nhlPic(p.id)}" alt="${p.n}" onerror="this.src='';this.style.display='none';this.nextElementSibling.style.display='flex'"><span class="pos-init" style="display:none;font-family:var(--mono);font-size:13px;color:var(--t3)">${p.num}</span></div>
+          <div class="lnm">${p.n.split(' ').slice(-1)[0]}</div>
+        </div>`).join('')}
+      </div>
     </div>`).join('');
 }
 
 function renderBDef(){
-  document.getElementById('bdef').innerHTML = BDEF.map(pair=>`
-    <div class="line-section">
-      <div class="line-row">
-        <span class="line-lbl">${pair.pr}</span>
-        <div class="line-players" style="justify-content:flex-start;gap:16px">
-          ${pair.players.map(p=>`
-            <div class="lp" style="flex:0 0 auto;min-width:70px" onclick="openBPlayer(${JSON.stringify(p).replace(/"/g,"'")})">
-              <div class="lp-photo">
-                <img src="${nhlPic(p.id)}" alt="${p.n}"
-                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-                <span class="lp-init" style="display:none">${inits(p.n)}</span>
-              </div>
-              <div class="lp-name">${p.n.split(' ').slice(-1)[0]}</div>
-              <div class="lp-stat">${p.pts}pts · ${p.toi}</div>
-            </div>`).join('')}
-        </div>
-      </div>
-      <div class="hdiv"></div>
-    </div>`).join('');
-}
-
-function renderBGoal(){
-  document.getElementById('bgoal').innerHTML = BGOAL.map((p,i)=>`
-    ${i>0?'<div class="hdiv"></div>':''}
-    <div class="prow" onclick="openBPlayer(${JSON.stringify(p).replace(/"/g,"'")})">
-      <div class="prow-photo">
-        <img src="${nhlPic(p.id)}" alt="${p.n}"
-             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-        <span class="prow-init" style="display:none">${inits(p.n)}</span>
-      </div>
-      <div class="prow-info">
-        <div class="prow-name">${p.n}</div>
-        <div class="prow-stat">${p.gaa} GAA · ${p.sv} SV% · ${p.rec}</div>
-      </div>
-      <span class="rbadge rb-sp">G</span>
-    </div>`).join('');
-}
-
-function renderBScr(){
-  document.getElementById('bscr').innerHTML = BSCR.length
-    ? BSCR.map(p=>`
-        <div class="scratch-row">
-          <span class="scratch-lbl">SCRATCH</span>
-          <span class="scratch-name">${p.n}</span>
-          <span style="font-family:var(--mono);font-size:8px;color:var(--t3);margin:0 6px">${p.pos}</span>
-          <span class="scratch-reason">${p.reason}</span>
-        </div>`).join('')
-    : `<div style="padding:12px;font-family:var(--mono);font-size:9px;color:var(--t3);text-align:center">No healthy scratches</div>`;
-}
-
-function renderBPros(){
-  const el = document.getElementById('bpros');
-  el.innerHTML = `
-    <thead>
-      <tr>
-        <th>#</th><th>Name</th><th>Pos</th><th>League</th><th>GP</th><th>Stats</th><th>Age</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${BPROS.map(p=>`
-        <tr>
-          <td><span class="pros-rank ${p.r<=3?'top':''}">#${p.r}</span></td>
-          <td><div class="pros-name">${p.n}</div></td>
-          <td><span class="pros-pos">${p.pos}</span></td>
-          <td><span class="pros-pos">${p.lg}</span></td>
-          <td><span class="pros-stats">${p.gp}</span></td>
-          <td><span class="pros-stats">${p.stat}</span></td>
-          <td><span class="pros-stats">${p.age}</span></td>
-        </tr>`).join('')}
-    </tbody>`;
-}
-
-function renderBDraft(){
-  const el = document.getElementById('bdraft');
-  el.innerHTML = BDRAFT.map(pick=>`
-    <div class="draft-pick">
-      <div class="dp-header">
-        <div>
-          <span class="dp-round">Round ${pick.round}</span>
-          <span class="dp-num"> · ${pick.pick} Overall</span>
-        </div>
-        <span class="dp-origin">${pick.origin === 'OWN' ? 'Own Pick' : pick.origin}</span>
-      </div>
-      <div style="padding:6px 10px;background:var(--bg);border-bottom:1px solid var(--border2)">
-        <span style="font-family:var(--mono);font-size:8px;color:var(--t3)">${pick.note}</span>
-      </div>
-      <div style="padding:4px 6px;font-family:var(--mono);font-size:8px;color:var(--bg-gold);letter-spacing:.1em;padding:6px 14px 4px;text-transform:uppercase">
-        Top Projected Targets
-      </div>
-      ${pick.prospects.map(pr=>`
-        <div class="scout-card">
-          <span class="sc-rank r${pr.rank}">${pr.rank}</span>
-          <div class="sc-photo"><span class="sc-init">${inits(pr.n)}</span></div>
-          <div class="sc-info">
-            <div class="sc-name">${pr.n}</div>
-            <div class="sc-meta">${pr.pos} · ${pr.lg} · ${pr.nat} · Age ${pr.age}</div>
-            <div class="sc-desc">${pr.grade}</div>
-            <div class="sc-grades">
-              ${pr.grades.map(g=>`<span class="sc-grade sg-${g.g}">${g.l}: ${g.g.toUpperCase()}</span>`).join('')}
-            </div>
-          </div>
-          <span class="sc-fit-tag">STL FIT</span>
+  document.getElementById('bdef').innerHTML = BDEF.map(pair =>
+    `<div class="pcard">
+      <div class="lnum">${pair.pr}</div>
+      ${pair.p.map(p =>
+        `<div class="lslot" onclick="openBPlayer('${p.id}','${p.n}','${p.pos}')" style="border-right:1px solid var(--bdr)">
+          <span class="lpos">${p.pos}</span>
+          <div class="lcirc"><img src="${nhlPic(p.id)}" alt="${p.n}" onerror="this.src='';this.style.display='none';this.nextElementSibling.style.display='flex'"><span class="pos-init" style="display:none;font-family:var(--mono);font-size:13px;color:var(--t3)">${p.num}</span></div>
+          <div class="lnm">${p.n.split(' ').slice(-1)[0]}${p.note?`<span class="acq" style="font-size:7px">${p.note.includes('debut')?'DEBUT':'NOTE'}</span>`:''}</div>
         </div>`).join('')}
     </div>`).join('');
 }
 
-// ══════════════════════════════════════════
-// LIVE DATA — NHL API
-// ══════════════════════════════════════════
-async function fetchBluesLive(){
+function renderBGoal(){
+  document.getElementById('bgoal').innerHTML = BGOAL.map((p,i) =>
+    `${i?'<div class="hdiv"></div>':''}
+    <div class="grow" onclick="openBPlayer('${p.id}','${p.n}','G')">
+      <div class="lcirc"><img src="${nhlPic(p.id)}" alt="${p.n}" onerror="this.src='';this.style.display='none';this.nextElementSibling.style.display='flex'"><span class="pos-init" style="display:none;font-family:var(--mono);font-size:13px;color:var(--t3)">${p.num}</span></div>
+      <div class="g-info"><div class="g-nm">${p.n}</div><div class="g-st">#${p.num} · ${p.stat}</div></div>
+    </div>`).join('');
+}
+
+function renderBPros(){
+  document.getElementById('bpros').innerHTML = `
+    <thead><tr><th>#</th><th>Name</th><th>Pos</th><th>League</th><th>Age</th><th>Notes</th></tr></thead>
+    <tbody>${BPROS.map(p=>`
+      <tr>
+        <td><span class="prk ${p.r<=3?'top':''}">#${p.r}</span></td>
+        <td><span class="pnm">${p.n}${p.acq?'<span class="acq">ACQ</span>':''}</span></td>
+        <td><span class="ppos">${p.pos}</span></td>
+        <td><span class="ppos">${p.lg}</span></td>
+        <td><span class="ppos">${p.age}</span></td>
+        <td><span style="font-size:10px;color:var(--t2)">${p.note}</span></td>
+      </tr>`).join('')}</tbody>`;
+}
+
+function renderBDraft(){
+  document.getElementById('bdraft').innerHTML = BDRAFT.map(d =>
+    `<div class="dpick">
+      <div class="dp-h"><span class="dp-r">${d.round}</span><span class="dp-t">${d.origin}</span></div>
+      <div class="dp-note">${d.pick}</div>
+      <div style="padding:5px 12px;font-size:10px;color:var(--t2)">${d.note}</div>
+    </div>`).join('');
+}
+
+/* ═══ POPUP — CARDINALS ═══ */
+function openCPlayer(fieldIdx, arrIdx, src){
+  let name, id, note='';
+  if(fieldIdx >= 0){
+    name = CFIELD[fieldIdx].name;
+    id   = CFIELD[fieldIdx].id;
+    note = CFIELD[fieldIdx].note;
+  } else if(src === 'rot'){
+    name = CROT[arrIdx].name;
+    id   = CROT[arrIdx].id;
+  } else {
+    name = CBULL[arrIdx].name;
+    id   = CBULL[arrIdx].id;
+  }
+  const pic = id ? mlbPic(id) : '';
+
+  openPop(`
+    <div class="pop-h" style="border-top:3px solid var(--cr)">
+      <div class="pop-pic">${pic ? `<img src="${pic}" alt="${name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><span class="pos-init" style="display:none;font-size:16px;color:var(--t3)">${ini(name)}</span>` : `<span class="pos-init" style="font-size:16px;color:var(--t3)">${ini(name)}</span>`}</div>
+      <div style="flex:1"><div class="pop-nm">${name}</div><div class="pop-meta">St. Louis Cardinals · 2026${note?' · '+note:''}</div></div>
+      <button class="pop-x" onclick="closePop()">✕</button>
+    </div>
+    <div class="pop-b" id="cpop-body">
+      <div style="padding:12px;text-align:center;font-family:var(--mono);font-size:9px;color:var(--t3)">Loading 2025 stats...</div>
+    </div>`);
+
+  // Determine if this player is a pitcher (from rotation/bullpen arrays)
+  const isPitcher = (fieldIdx < 0);
+
+  if(id){
+    // Fetch both MLB stats AND MiLB stats for fallback
+    Promise.all([
+      fetch('https://statsapi.mlb.com/api/v1/people/'+id+'/stats?stats=season&season=2025&group=hitting').then(r=>r.json()).catch(()=>null),
+      fetch('https://statsapi.mlb.com/api/v1/people/'+id+'/stats?stats=season&season=2025&group=pitching').then(r=>r.json()).catch(()=>null),
+      fetch('https://statsapi.mlb.com/api/v1/people/'+id+'/stats?stats=yearByYear&season=2025&group=hitting').then(r=>r.json()).catch(()=>null),
+    ]).then(([hitData, pitData, milbHitData])=>{
+      const b = document.getElementById('cpop-body');
+      if(!b) return;
+      const hs = hitData?.stats?.[0]?.splits?.[0]?.stat;
+      const ps = pitData?.stats?.[0]?.splits?.[0]?.stat;
+      // Filter MiLB splits: yearByYear returns all levels, keep only non-MLB (sportId != 1)
+      const milbSplits = (milbHitData?.stats?.[0]?.splits || []).filter(sp =>
+        sp.sport?.id !== 1 && sp.stat?.gamesPlayed > 0
+      );
+      let html = '';
+
+      // Smart stat priority: position players see hitting first, pitchers see pitching first
+      const hasHitting = hs && hs.avg;
+      const hasPitching = ps && ps.era;
+
+      // Position players: always show hitting if available; only show pitching if NO hitting exists
+      // Pitchers: always show pitching if available; only show hitting if NO pitching exists
+      const showHitting = isPitcher ? (!hasPitching && hasHitting) : hasHitting;
+      const showPitching = isPitcher ? hasPitching : (!hasHitting && hasPitching && parseFloat(ps.inningsPitched||0) > 5);
+
+      if(showHitting){
+        html += `<div class="pop-sec">2025 Batting</div>
+        <div class="pop-sg">
+          <div class="pop-s"><div class="psv" style="color:var(--cr)">${hs.avg}</div><div class="psl">AVG</div></div>
+          <div class="pop-s"><div class="psv">${hs.obp||'—'}</div><div class="psl">OBP</div></div>
+          <div class="pop-s"><div class="psv">${hs.slg||'—'}</div><div class="psl">SLG</div></div>
+          <div class="pop-s"><div class="psv">${hs.ops||'—'}</div><div class="psl">OPS</div></div>
+        </div>
+        <div class="pop-sg">
+          <div class="pop-s"><div class="psv" style="font-size:16px">${hs.homeRuns||0}</div><div class="psl">HR</div></div>
+          <div class="pop-s"><div class="psv" style="font-size:16px">${hs.rbi||0}</div><div class="psl">RBI</div></div>
+          <div class="pop-s"><div class="psv" style="font-size:16px">${hs.stolenBases||0}</div><div class="psl">SB</div></div>
+          <div class="pop-s"><div class="psv" style="font-size:16px">${hs.gamesPlayed||0}</div><div class="psl">GP</div></div>
+        </div>`;
+      } else if(showPitching){
+        html += `<div class="pop-sec">2025 Pitching</div>
+        <div class="pop-sg">
+          <div class="pop-s"><div class="psv" style="color:var(--cr)">${ps.era}</div><div class="psl">ERA</div></div>
+          <div class="pop-s"><div class="psv">${ps.whip||'—'}</div><div class="psl">WHIP</div></div>
+          <div class="pop-s"><div class="psv">${ps.strikeOuts||'—'}</div><div class="psl">K</div></div>
+          <div class="pop-s"><div class="psv">${ps.inningsPitched||'—'}</div><div class="psl">IP</div></div>
+        </div>
+        <div class="pop-sg">
+          <div class="pop-s"><div class="psv" style="font-size:16px">${ps.wins||0}-${ps.losses||0}</div><div class="psl">W-L</div></div>
+          <div class="pop-s"><div class="psv" style="font-size:16px">${ps.saves||'—'}</div><div class="psl">SV</div></div>
+          <div class="pop-s"><div class="psv" style="font-size:16px">${ps.gamesPlayed||'—'}</div><div class="psl">GP</div></div>
+          <div class="pop-s"><div class="psv" style="font-size:16px">${ps.strikeoutsPer9Inn||'—'}</div><div class="psl">K/9</div></div>
+        </div>`;
+      } else if(milbSplits.length > 0){
+        // Aggregate MiLB stats across all levels
+        let tg=0,tab=0,th=0,thr=0,trbi=0,tsb=0,tbb=0;
+        milbSplits.forEach(sp=>{
+          const s=sp.stat;
+          tg+=s.gamesPlayed||0;tab+=s.atBats||0;th+=s.hits||0;
+          thr+=s.homeRuns||0;trbi+=s.rbi||0;tsb+=s.stolenBases||0;tbb+=s.baseOnBalls||0;
+        });
+        const avg=tab>0?(th/tab).toFixed(3):'—';
+        const obp=(tab+tbb)>0?((th+tbb)/(tab+tbb)).toFixed(3):'—';
+        html += `<div class="pop-sec">2025 MiLB Batting (Combined)</div>
+        <div class="pop-sg">
+          <div class="pop-s"><div class="psv" style="color:var(--cr)">${avg}</div><div class="psl">AVG</div></div>
+          <div class="pop-s"><div class="psv">${obp}</div><div class="psl">OBP</div></div>
+          <div class="pop-s"><div class="psv">${thr}</div><div class="psl">HR</div></div>
+          <div class="pop-s"><div class="psv">${tg}</div><div class="psl">GP</div></div>
+        </div>
+        <div class="pop-sg">
+          <div class="pop-s"><div class="psv" style="font-size:16px">${trbi}</div><div class="psl">RBI</div></div>
+          <div class="pop-s"><div class="psv" style="font-size:16px">${tsb}</div><div class="psl">SB</div></div>
+          <div class="pop-s"><div class="psv" style="font-size:16px">${th}</div><div class="psl">Hits</div></div>
+          <div class="pop-s"><div class="psv" style="font-size:16px">${tbb}</div><div class="psl">BB</div></div>
+        </div>`;
+      } else {
+        html += `<div class="pop-sec">Stats</div>
+        <div style="padding:8px 0;font-family:var(--mono);font-size:11px;color:var(--t2)">No 2025 stats available — season opens Mar 26</div>`;
+      }
+      html += `<div class="pop-sec">External Links</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <a class="elink el-c" href="${savantUrl(id)}" target="_blank">⚡ Savant</a>
+        <a class="elink el-c" href="${bbrefUrl(id)}" target="_blank">📊 BBRef</a>
+        <a class="elink el-c" href="${fgUrl(name)}" target="_blank">📈 FanGraphs</a>
+        <a class="elink" href="${mlbPlayerUrl(id)}" target="_blank">⚾ MLB.com</a>
+      </div>`;
+      b.innerHTML = html;
+    });
+  } else {
+    const b = document.getElementById('cpop-body');
+    if(b) b.innerHTML = `<div class="pop-sec">External Links</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <a class="elink el-c" href="${fgUrl(name)}" target="_blank">📈 FanGraphs</a>
+      </div>`;
+  };
+}
+
+function openCProspect(idx){
+  const p = CPROS[idx];
+  openPop(`
+    <div class="pop-h" style="border-top:3px solid var(--cr)">
+      <div class="pop-pic"><span class="pos-init" style="font-size:16px;color:var(--t3)">${ini(p.n)}</span></div>
+      <div style="flex:1"><div class="pop-nm">${p.n}</div><div class="pop-meta">${p.pos} · ${p.lvl} · FV ${p.fv} · ETA ${p.eta}${p.t100?' · MLB T100 #'+p.t100:''}</div></div>
+      <button class="pop-x" onclick="closePop()">✕</button>
+    </div>
+    <div class="pop-b">
+      <div class="pop-sec">Scouting Notes</div>
+      <div style="padding:6px 0;font-size:12px;color:var(--t1)">${p.note}</div>
+      <div class="pop-sec">External Links</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <a class="elink el-c" href="https://www.mlb.com/prospects/cardinals" target="_blank">🔭 Pipeline</a>
+        <a class="elink el-c" href="${fgUrl(p.n)}" target="_blank">📈 FanGraphs</a>
+      </div>
+    </div>`);
+}
+
+/* ═══ POPUP — BLUES ═══ */
+function openBPlayer(nhlId, name, pos){
+  const slug = (name||'').toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+
+  openPop(`
+    <div class="pop-h" style="border-top:3px solid var(--gold)">
+      <div class="pop-pic"><img src="${nhlPic(nhlId)}" alt="${name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><span class="pos-init" style="display:none;font-size:16px;color:var(--t3)">${ini(name)}</span></div>
+      <div style="flex:1"><div class="pop-nm">${name}</div><div class="pop-meta">St. Louis Blues · 2025-26 · ${pos}</div></div>
+      <button class="pop-x" onclick="closePop()">✕</button>
+    </div>
+    <div class="pop-b" id="bpop-body">
+      <div style="padding:12px;text-align:center;font-family:var(--mono);font-size:9px;color:var(--t3)">Loading stats...</div>
+    </div>`);
+
+  fetch(`https://api-web.nhle.com/v1/player/${nhlId}/landing`)
+    .then(r=>r.json())
+    .then(data=>{
+      const s = data.seasonTotals?.find(x=>x.season===20252026&&x.gameTypeId===2) || {};
+      const b = document.getElementById('bpop-body');
+      if(!b) return;
+      const isG = pos==='G';
+
+      let html = '<div class="pop-sec">2025–26 Season</div>';
+      if(isG){
+        html += `<div class="pop-sg">
+          <div class="pop-s"><div class="psv" style="color:var(--gold)">${s.wins??'—'}</div><div class="psl">Wins</div></div>
+          <div class="pop-s"><div class="psv">${s.goalsAgainstAvg?.toFixed(2)??'—'}</div><div class="psl">GAA</div></div>
+          <div class="pop-s"><div class="psv">${s.savePctg?.toFixed(3)??'—'}</div><div class="psl">SV%</div></div>
+          <div class="pop-s"><div class="psv">${s.shutouts??'—'}</div><div class="psl">SO</div></div>
+        </div>`;
+      } else {
+        html += `<div class="pop-sg">
+          <div class="pop-s"><div class="psv" style="color:var(--gold)">${s.points??'—'}</div><div class="psl">PTS</div></div>
+          <div class="pop-s"><div class="psv">${s.goals??'—'}</div><div class="psl">G</div></div>
+          <div class="pop-s"><div class="psv">${s.assists??'—'}</div><div class="psl">A</div></div>
+          <div class="pop-s"><div class="psv">${s.gamesPlayed??'—'}</div><div class="psl">GP</div></div>
+        </div>
+        <div class="pop-sg" style="grid-template-columns:1fr 1fr 1fr">
+          <div class="pop-s"><div class="psv" style="font-size:16px">${s.plusMinus!=null?(s.plusMinus>0?'+':'')+s.plusMinus:'—'}</div><div class="psl">+/−</div></div>
+          <div class="pop-s"><div class="psv" style="font-size:16px">${s.avgToi??'—'}</div><div class="psl">TOI</div></div>
+          <div class="pop-s"><div class="psv" style="font-size:16px">${s.shots??'—'}</div><div class="psl">Shots</div></div>
+        </div>`;
+      }
+
+      html += `<div class="pop-sec">External Links</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <a class="elink el-b" href="https://www.nhl.com/player/${nhlId}" target="_blank">🏒 NHL.com</a>
+          <a class="elink el-b" href="https://puckpedia.com/player/${slug}" target="_blank">💰 PuckPedia</a>
+          <a class="elink el-b" href="https://www.eliteprospects.com/search#q=${encodeURIComponent(name)}" target="_blank">🔭 EliteProspects</a>
+          <a class="elink" href="https://www.naturalstattrick.com/playerteams.php?fromseason=20252026&thruseason=20252026&stype=2&sit=all&score=all&stdoi=std&rate=n&team=STL&pos=S&loc=B&toi=0&gpfilt=none" target="_blank">📐 NST</a>
+        </div>`;
+
+      b.innerHTML = html;
+    })
+    .catch(()=>{
+      const b = document.getElementById('bpop-body');
+      if(b) b.innerHTML = `
+        <div class="pop-sec">External Links</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <a class="elink el-b" href="https://www.nhl.com/player/${nhlId}" target="_blank">🏒 NHL.com</a>
+          <a class="elink el-b" href="https://puckpedia.com/player/${slug}" target="_blank">💰 PuckPedia</a>
+          <a class="elink el-b" href="https://www.eliteprospects.com/search#q=${encodeURIComponent(name)}" target="_blank">🔭 EliteProspects</a>
+        </div>`;
+    });
+}
+
+/* ═══ LIVE API — CARDINALS TEAM STATS ═══ */
+async function fetchCardinals(){
+  try {
+    // Try to fetch 2026 team stats; will populate once season starts
+    const [standRes, statRes] = await Promise.all([
+      fetch('https://statsapi.mlb.com/api/v1/standings?leagueId=104&season=2026').then(r=>r.json()).catch(()=>null),
+      fetch('https://statsapi.mlb.com/api/v1/teams/138/stats?stats=season&group=hitting,pitching&season=2026').then(r=>r.json()).catch(()=>null),
+    ]);
+
+    // Find Cardinals in standings
+    let cards = null;
+    if(standRes?.records){
+      for(const div of standRes.records){
+        const t = div.teamRecords?.find(t=>t.team?.id===138);
+        if(t){cards=t;break;}
+      }
+    }
+
+    if(cards){
+      document.getElementById('crec').textContent = `${cards.wins}–${cards.losses}`;
+      document.getElementById('cs-w').textContent = cards.wins ?? '—';
+      document.getElementById('cs-l').textContent = cards.losses ?? '—';
+    } else {
+      document.getElementById('crec').textContent = 'Pre-Season';
+    }
+
+    // Parse team stats
+    if(statRes?.stats){
+      for(const s of statRes.stats){
+        const split = s.splits?.[0]?.stat;
+        if(!split) continue;
+        if(split.avg) {
+          document.getElementById('cs-avg').textContent = split.avg;
+          document.getElementById('cs-hr').textContent = split.homeRuns ?? '—';
+          document.getElementById('cs-sb').textContent = split.stolenBases ?? '—';
+          document.getElementById('cs-ops').textContent = split.ops ?? '—';
+          document.getElementById('cs-rs').textContent = split.runs ?? '—';
+        }
+        if(split.era) {
+          document.getElementById('cs-era').textContent = split.era;
+        }
+      }
+    }
+
+  } catch(e){
+    console.warn('Cardinals API:', e);
+    // Pre-season fallback
+    document.getElementById('crec').textContent = 'Opens Mar 26';
+    document.getElementById('cs-w').textContent = '0';
+    document.getElementById('cs-l').textContent = '0';
+    document.getElementById('cs-avg').textContent = '—';
+    document.getElementById('cs-era').textContent = '—';
+    document.getElementById('cs-hr').textContent = '—';
+    document.getElementById('cs-sb').textContent = '—';
+    document.getElementById('cs-ops').textContent = '—';
+    document.getElementById('cs-rs').textContent = '—';
+  }
+}
+
+/* ═══ LIVE API — BLUES ═══ */
+async function fetchBlues(){
   try {
     const [standRes, schedRes] = await Promise.all([
       fetch('https://api-web.nhle.com/v1/standings/now'),
       fetch('https://api-web.nhle.com/v1/club-schedule-season/STL/now'),
     ]);
-    const standData = await standRes.json();
-    const blues = standData.standings?.find(t=>t.teamAbbrev?.default==='STL');
 
+    const sd = await standRes.json();
+    const blues = sd.standings?.find(t=>t.teamAbbrev?.default==='STL');
     if(blues){
-      document.getElementById('blues-rec').textContent =
-        `${blues.wins}–${blues.losses}–${blues.otLosses} · ${blues.points} PTS`;
-
-      document.getElementById('bstats').innerHTML = `
-        <div class="stat-grid">
-          <div class="stat-box"><div class="stat-val sv-b">${blues.wins??'—'}</div><div class="stat-lbl">Wins</div></div>
-          <div class="stat-box"><div class="stat-val sv-n">${blues.points??'—'}</div><div class="stat-lbl">Points</div></div>
-          <div class="stat-box"><div class="stat-val sv-n">${blues.goalFor??'—'}</div><div class="stat-lbl">GF</div></div>
-          <div class="stat-box"><div class="stat-val sv-n">${blues.goalAgainst??'—'}</div><div class="stat-lbl">GA</div></div>
-        </div>
-        <div style="margin-top:8px">
-          <div class="stat-grid">
-            <div class="stat-box"><div class="stat-val sv-n" style="font-size:16px">${blues.homeWins??'—'}-${blues.homeLosses??'—'}</div><div class="stat-lbl">Home</div></div>
-            <div class="stat-box"><div class="stat-val sv-n" style="font-size:16px">${blues.roadWins??'—'}-${blues.roadLosses??'—'}</div><div class="stat-lbl">Away</div></div>
-          </div>
-        </div>`;
+      document.getElementById('brec').textContent = `${blues.wins}–${blues.losses}–${blues.otLosses} · ${blues.points} PTS`;
+      document.getElementById('bs-w').textContent = blues.wins ?? '—';
+      document.getElementById('bs-l').textContent = blues.losses ?? '—';
+      document.getElementById('bs-otl').textContent = blues.otLosses ?? '—';
+      document.getElementById('bs-pts').textContent = blues.points ?? '—';
+      document.getElementById('bs-gf').textContent = blues.goalFor ?? '—';
+      document.getElementById('bs-ga').textContent = blues.goalAgainst ?? '—';
+      const hw = blues.homeWins!=null ? `${blues.homeWins}-${blues.homeLosses}` : '—';
+      const aw = blues.roadWins!=null ? `${blues.roadWins}-${blues.roadLosses}` : '—';
+      document.getElementById('bs-home').textContent = hw;
+      document.getElementById('bs-away').textContent = aw;
     }
 
-    const schedData = await schedRes.json();
-    const played = (schedData.games||[]).filter(g=>g.gameState==='OFF' || g.gameState==='FINAL');
+    const schd = await schedRes.json();
+    const played = (schd.games||[]).filter(g=>g.gameState==='OFF'||g.gameState==='FINAL');
     const last5 = played.slice(-5).reverse();
-
-    if(last5.length){
-      document.getElementById('blast5').innerHTML = last5.map(g=>{
-        const home = g.homeTeam?.abbrev==='STL';
-        const opp  = home ? g.awayTeam : g.homeTeam;
-        const us   = home ? g.homeTeam?.score : g.awayTeam?.score;
-        const them = home ? g.awayTeam?.score : g.homeTeam?.score;
-        const won  = us > them;
-        const res  = won ? 'W' : 'L';
-        return `
-          <div class="game-row">
-            <span class="g-res" style="color:${won?'var(--win)':'var(--loss)'}">${res}</span>
-            <span class="g-opp">${home?'vs':'@'} ${opp?.abbrev??'—'}</span>
-            <span class="g-score">${us??'—'}–${them??'—'}</span>
+    document.getElementById('blast5').innerHTML = last5.length
+      ? last5.map(g=>{
+          const home = g.homeTeam?.abbrev==='STL';
+          const opp = home ? g.awayTeam : g.homeTeam;
+          const us = home ? g.homeTeam?.score : g.awayTeam?.score;
+          const them = home ? g.awayTeam?.score : g.homeTeam?.score;
+          const won = us > them;
+          const dt = g.gameDate ? new Date(g.gameDate).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+          return `<div class="grow">
+            <span class="gres" style="color:${won?'var(--win)':'var(--loss)'}">${won?'W':'L'}</span>
+            <span style="font-size:11px;color:var(--t2);flex:1">${home?'vs':'@'} ${opp?.abbrev??'—'}</span>
+            <span style="font-family:var(--mono);font-size:12px">${us??'—'}–${them??'—'}</span>
+            <span style="font-family:var(--mono);font-size:9px;color:var(--t3)">${dt}</span>
           </div>`;
-      }).join('');
-    } else {
-      document.getElementById('blast5').innerHTML =
-        `<div style="padding:14px;text-align:center;font-family:var(--mono);font-size:9px;color:var(--t3)">No recent results</div>`;
-    }
+        }).join('')
+      : '<div class="empty">No recent results</div>';
+
   } catch(e){
-    document.getElementById('bstats').innerHTML =
-      `<div style="padding:14px;text-align:center;font-family:var(--mono);font-size:9px;color:var(--t3)">Stats unavailable</div>`;
-    document.getElementById('blast5').innerHTML =
-      `<div style="padding:14px;text-align:center;font-family:var(--mono);font-size:9px;color:var(--t3)">Schedule unavailable</div>`;
+    console.warn('Blues API error:', e);
+    document.getElementById('brec').textContent = '25–29–10 · 60 PTS';
+    document.getElementById('bs-w').textContent = '25';
+    document.getElementById('bs-l').textContent = '29';
+    document.getElementById('bs-otl').textContent = '10';
+    document.getElementById('bs-pts').textContent = '60';
+    document.getElementById('bs-gf').textContent = '168';
+    document.getElementById('bs-ga').textContent = '213';
+    document.getElementById('bs-home').textContent = '14-14';
+    document.getElementById('bs-away').textContent = '11-15';
+    document.getElementById('blast5').innerHTML = '<div class="empty">API unavailable — refresh to retry</div>';
   }
 }
 
-// Cardinals record from MLB standings
-async function fetchCardsRecord(){
+/* ═══ FEATURE: NL CENTRAL STANDINGS ═══ */
+async function fetchNLCStandings(){
   try {
-    const res = await fetch('https://statsapi.mlb.com/api/v1/standings?leagueId=104&season=2025&standingsTypes=regularSeason');
-    const data = await res.json();
-    let found = false;
-    for(const div of data.records||[]){
-      for(const t of div.teamRecords||[]){
-        if(t.team?.id===138){
-          document.getElementById('cards-rec').textContent =
-            `${t.wins}–${t.losses} · .${Math.round(t.winningPercentage*1000)} PCT`;
-          found = true; break;
-        }
-      }
-      if(found) break;
-    }
-  } catch(e){ /* silent fail */ }
-}
-
-// ══════════════════════════════════════════
-// NEWS RSS
-// ══════════════════════════════════════════
-async function fetchNews(q, id, lnkCls){
-  const url = `https://api.allorigins.win/get?url=${encodeURIComponent('https://news.google.com/rss/search?q='+encodeURIComponent(q)+'&hl=en-US&gl=US&ceid=US:en')}`;
-  try {
-    const r = await fetch(url);
+    const r = await fetch('https://statsapi.mlb.com/api/v1/standings?leagueId=104&season=2026&standingsTypes=regularSeason');
     const d = await r.json();
-    const xml = new DOMParser().parseFromString(d.contents,'text/xml');
-    const items = Array.from(xml.querySelectorAll('item')).slice(0,6);
-    if(!items.length) throw new Error();
-    document.getElementById(id).innerHTML = `<div class="news-grid">${
-      items.map(it=>{
-        const title = it.querySelector('title')?.textContent||'';
-        const link  = it.querySelector('link')?.textContent||'#';
-        const src   = it.querySelector('source')?.textContent||'News';
-        const pub   = it.querySelector('pubDate')?.textContent||'';
-        const desc  = (it.querySelector('description')?.textContent||'').replace(/<[^>]*>/g,'').slice(0,110)+'…';
-        const dt    = pub ? new Date(pub).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
-        return `<a class="news-card" href="${link}" target="_blank" rel="noopener">
-          <div class="news-meta"><span class="news-src">${src}</span><span class="news-dt">${dt}</span></div>
-          <div class="news-hl">${title}</div>
-          <div class="news-ex">${desc}</div>
-          <span class="news-lnk ${lnkCls}">Read →</span>
-        </a>`;
-      }).join('')
-    }</div>`;
+    const nlc = d.records?.find(div=>div.division?.id===205); // NL Central
+    if(!nlc?.teamRecords?.length){
+      document.getElementById('cstand').innerHTML='<div class="empty">No standings yet — season opens Mar 26</div>';return;
+    }
+    const teams = nlc.teamRecords.sort((a,b)=>(a.divisionRank||99)-(b.divisionRank||99));
+    document.getElementById('cstand').innerHTML=`<table class="dtbl"><thead><tr><th>Team</th><th>W</th><th>L</th><th>PCT</th><th>GB</th><th>Strk</th><th>L10</th></tr></thead><tbody>${
+      teams.map(t=>{
+        const me=t.team?.id===138;
+        const l10=t.records?.splitRecords?.find(r=>r.type==='lastTen');
+        const strk=t.streak?.streakCode||'—';
+        return`<tr class="${me?'me':''}"><td>${t.team?.abbreviation||'—'}</td><td>${t.wins}</td><td>${t.losses}</td><td>${t.winningPercentage||'—'}</td><td>${t.gamesBack==='0.0'?'—':t.gamesBack||'—'}</td><td>${strk}</td><td>${l10?l10.wins+'-'+l10.losses:'—'}</td></tr>`;
+      }).join('')}</tbody></table>`;
   } catch(e){
-    document.getElementById(id).innerHTML =
-      `<div style="padding:20px;text-align:center;font-family:var(--mono);font-size:9px;color:var(--t3)">News unavailable</div>`;
+    document.getElementById('cstand').innerHTML='<div class="empty">Season opens Mar 26</div>';
   }
 }
 
-// ══════════════════════════════════════════
-// PLAYER POPUPS
-// ══════════════════════════════════════════
-function openCPlayer(p){
-  const name = p.n || p.name;
-  const id   = p.id;
-  openPop(`
-    <div class="pop-hdr" style="border-top:3px solid var(--cr)">
-      <div class="pop-photo">
-        ${id?`<img src="${mlbPic(id)}" alt="${name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><span class="pop-init" style="display:none">${inits(name)}</span>`:`<span class="pop-init">${inits(name)}</span>`}
-      </div>
-      <div class="pop-info">
-        <div class="pop-name">${name}</div>
-        <div class="pop-meta">St. Louis Cardinals · MLB</div>
-      </div>
-      <button class="pop-close" onclick="closePopup()">✕</button>
-    </div>
-    <div class="pop-body">
-      <div class="ld"><div class="spinner"></div><span class="ld-txt">Loading Statcast...</span></div>
-    </div>`);
+/* ═══ FEATURE: NHL CENTRAL STANDINGS ═══ */
+async function fetchNHLStandings(){
+  try {
+    const r = await fetch('https://api-web.nhle.com/v1/standings/now');
+    const d = await r.json();
+    // Filter Central Division teams
+    const central = (d.standings||[]).filter(t=>t.divisionName==='Central').sort((a,b)=>b.points-a.points);
+    if(!central.length){document.getElementById('bstand').innerHTML='<div class="empty">No data</div>';return;}
+    document.getElementById('bstand').innerHTML=`<table class="dtbl dtbl-b"><thead><tr><th>Team</th><th>GP</th><th>W</th><th>L</th><th>OTL</th><th>PTS</th></tr></thead><tbody>${
+      central.map(t=>{
+        const me=t.teamAbbrev?.default==='STL';
+        return`<tr class="${me?'me':''}"><td>${t.teamAbbrev?.default||'—'}</td><td>${t.gamesPlayed}</td><td>${t.wins}</td><td>${t.losses}</td><td>${t.otLosses}</td><td style="font-weight:600">${t.points}</td></tr>`;
+      }).join('')}</tbody></table>`;
+  } catch(e){
+    document.getElementById('bstand').innerHTML='<div class="empty">API unavailable</div>';
+  }
+}
 
-  setTimeout(()=>{
-    const b = document.querySelector('#pop .pop-body');
-    if(!b) return;
-    b.innerHTML = `
-      <div class="pop-section">Season Stats — 2025</div>
-      <div class="pop-stat-grid">
-        <div class="pop-stat-box"><div class="psv sv-c" style="color:var(--cr)">—</div><div class="psl">AVG</div></div>
-        <div class="pop-stat-box"><div class="psv sv-n">—</div><div class="psl">OBP</div></div>
-        <div class="pop-stat-box"><div class="psv sv-n">—</div><div class="psl">SLG</div></div>
-        <div class="pop-stat-box"><div class="psv sv-n">—</div><div class="psl">wRC+</div></div>
-      </div>
-      <div class="pop-section">Statcast — 2025</div>
-      <div class="pop-stat-grid">
-        <div class="pop-stat-box"><div class="psv sv-n">—</div><div class="psl">Exit Velo</div></div>
-        <div class="pop-stat-box"><div class="psv sv-n">—</div><div class="psl">Hard Hit%</div></div>
-        <div class="pop-stat-box"><div class="psv sv-n">—</div><div class="psl">Sprint Spd</div></div>
-        <div class="pop-stat-box"><div class="psv sv-n">—</div><div class="psl">xBA</div></div>
-      </div>
-      <div class="pop-section">Links</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <a class="ext-link el-c" href="https://baseballsavant.mlb.com/savant-player/${(name||'').toLowerCase().replace(/\s+/g,'-')}-${id}" target="_blank" rel="noopener">Baseball Savant ↗</a>
-        <a class="ext-link" href="https://www.baseball-reference.com/search/search.fcgi?q=${encodeURIComponent(name)}" target="_blank" rel="noopener">B-Ref ↗</a>
+/* ═══ FEATURE: CARDINALS SCHEDULE ═══ */
+async function fetchCardSchedule(){
+  try {
+    const today = new Date().toISOString().slice(0,10);
+    const end = new Date(Date.now()+21*86400000).toISOString().slice(0,10);
+    const r = await fetch(`https://statsapi.mlb.com/api/v1/schedule?teamId=138&startDate=${today}&endDate=${end}&sportId=1&hydrate=probablePitcher`);
+    const d = await r.json();
+    const games = (d.dates||[]).flatMap(dt=>dt.games||[]).slice(0,7);
+    if(!games.length){document.getElementById('csched').innerHTML='<div class="empty">No upcoming games scheduled</div>';return;}
+    document.getElementById('csched').innerHTML=games.map(g=>{
+      const home = g.teams?.home?.team?.id===138;
+      const opp = home ? g.teams?.away?.team : g.teams?.home?.team;
+      const oppId = opp?.id||0;
+      const dt = new Date(g.gameDate);
+      const dateStr = dt.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+      const timeStr = dt.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+      const prob = home ? g.teams?.away?.probablePitcher : g.teams?.home?.probablePitcher;
+      const ourProb = home ? g.teams?.home?.probablePitcher : g.teams?.away?.probablePitcher;
+      return`<div class="schd">
+        <div class="schd-dt">${dateStr}</div>
+        <div class="schd-opp">
+          <span class="schd-vs">${home?'vs':'@'}</span>
+          <img class="schd-logo" src="https://www.mlbstatic.com/team-logos/${oppId}.svg" alt="" onerror="this.style.display='none'">
+          <span class="schd-nm">${opp?.name||'TBD'}</span>
+        </div>
+        <div class="schd-time">${timeStr}</div>
+        <div class="schd-prob">${ourProb?.lastName||''} vs ${prob?.lastName||'TBD'}</div>
       </div>`;
-  },500);
+    }).join('');
+  } catch(e){
+    document.getElementById('csched').innerHTML='<div class="empty">Schedule unavailable</div>';
+  }
 }
 
-function openBPlayer(p){
-  const name = p.n || p.name;
-  const id   = p.id;
-  openPop(`
-    <div class="pop-hdr" style="border-top:3px solid var(--bg-gold)">
-      <div class="pop-photo">
-        ${id?`<img src="${nhlPic(id)}" alt="${name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><span class="pop-init" style="display:none">${inits(name)}</span>`:`<span class="pop-init">${inits(name)}</span>`}
-      </div>
-      <div class="pop-info">
-        <div class="pop-name">${name}</div>
-        <div class="pop-meta">St. Louis Blues · NHL</div>
-      </div>
-      <button class="pop-close" onclick="closePopup()">✕</button>
-    </div>
-    <div class="pop-body">
-      <div class="ld"><div class="spinner spinner-b"></div><span class="ld-txt">Loading NHL data...</span></div>
-    </div>`);
-
-  if(!id) return;
-
-  fetch(`https://api-web.nhle.com/v1/player/${id}/landing`)
-    .then(r=>r.json())
-    .then(data=>{
-      const s = data.seasonTotals?.find(x=>x.season===20252026&&x.gameTypeId===2)
-             || data.seasonTotals?.find(x=>x.season===20242025&&x.gameTypeId===2);
-      const b = document.querySelector('#pop .pop-body');
-      if(!b) return;
-      const isG = p.pos==='G' || data.position==='G';
-
-      if(isG){
-        b.innerHTML = `
-          <div class="pop-section">2025–26 Season</div>
-          <div class="pop-stat-grid">
-            <div class="pop-stat-box"><div class="psv" style="color:var(--bg-gold)">${s?.wins??'—'}</div><div class="psl">Wins</div></div>
-            <div class="pop-stat-box"><div class="psv sv-n">${s?.goalsAgainstAvg?.toFixed(2)??'—'}</div><div class="psl">GAA</div></div>
-            <div class="pop-stat-box"><div class="psv sv-n">${s?.savePctg?.toFixed(3)??'—'}</div><div class="psl">SV%</div></div>
-            <div class="pop-stat-box"><div class="psv sv-n">${s?.shutouts??'—'}</div><div class="psl">SO</div></div>
-          </div>`;
-      } else {
-        b.innerHTML = `
-          <div class="pop-section">2025–26 Season</div>
-          <div class="pop-stat-grid">
-            <div class="pop-stat-box"><div class="psv" style="color:var(--bg-gold)">${s?.points??'—'}</div><div class="psl">Points</div></div>
-            <div class="pop-stat-box"><div class="psv sv-n">${s?.goals??'—'}</div><div class="psl">Goals</div></div>
-            <div class="pop-stat-box"><div class="psv sv-n">${s?.assists??'—'}</div><div class="psl">Assists</div></div>
-            <div class="pop-stat-box"><div class="psv sv-n">${s?.gamesPlayed??'—'}</div><div class="psl">GP</div></div>
-          </div>
-          <div class="pop-section">Advanced</div>
-          <div class="pop-stat-grid" style="grid-template-columns:1fr 1fr">
-            <div class="pop-stat-box"><div class="psv sv-n" style="font-size:18px">${s?.avgToi??'—'}</div><div class="psl">Avg TOI</div></div>
-            <div class="pop-stat-box"><div class="psv sv-n" style="font-size:18px">${s?.plusMinus??'—'}</div><div class="psl">+/−</div></div>
-          </div>`;
-      }
-      b.innerHTML += `
-        <div class="pop-section">Links</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <a class="ext-link el-b" href="https://www.nhl.com/player/${id}" target="_blank" rel="noopener">NHL.com Profile ↗</a>
-        </div>`;
-    })
-    .catch(()=>{
-      const b=document.querySelector('#pop .pop-body');
-      if(b) b.innerHTML=`<div style="padding:20px;text-align:center;font-family:var(--mono);font-size:9px;color:var(--t3)">Stats unavailable</div>`;
-    });
+/* ═══ FEATURE: BLUES SCHEDULE ═══ */
+async function fetchBluesSchedule(){
+  try {
+    const r = await fetch('https://api-web.nhle.com/v1/club-schedule-season/STL/now');
+    const d = await r.json();
+    const upcoming = (d.games||[]).filter(g=>g.gameState==='FUT'||g.gameState==='PRE'||g.gameState==='LIVE').slice(0,5);
+    if(!upcoming.length){document.getElementById('bsched').innerHTML='<div class="empty">No upcoming games</div>';return;}
+    document.getElementById('bsched').innerHTML=upcoming.map(g=>{
+      const home = g.homeTeam?.abbrev==='STL';
+      const opp = home ? g.awayTeam : g.homeTeam;
+      const dt = new Date(g.startTimeUTC);
+      const dateStr = dt.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+      const timeStr = dt.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+      return`<div class="schd">
+        <div class="schd-dt">${dateStr}</div>
+        <div class="schd-opp">
+          <span class="schd-vs">${home?'vs':'@'}</span>
+          <img class="schd-logo" src="https://assets.nhle.com/logos/nhl/svg/${opp?.abbrev}_light.svg" alt="" onerror="this.style.display='none'" style="width:24px;height:24px">
+          <span class="schd-nm">${opp?.abbrev||'TBD'}</span>
+        </div>
+        <div class="schd-time">${timeStr}</div>
+      </div>`;
+    }).join('');
+  } catch(e){
+    document.getElementById('bsched').innerHTML='<div class="empty">Schedule unavailable</div>';
+  }
 }
 
-// ══════════════════════════════════════════
-// INIT
-// ══════════════════════════════════════════
-document.addEventListener('DOMContentLoaded',()=>{
-  // Cardinals
-  renderCPos();
+/* ═══ FEATURE: CARDINALS INJURIES ═══ */
+async function fetchCardInjuries(){
+  try {
+    const r = await fetch('https://statsapi.mlb.com/api/v1/teams/138/roster?rosterType=depthChart&season=2026');
+    // Also try the injuries endpoint
+    const r2 = await fetch('https://statsapi.mlb.com/api/v1/teams/138/roster?status=IL&season=2026').catch(()=>null);
+    let ilPlayers = [];
+    if(r2){
+      const d2 = await r2.json().catch(()=>null);
+      if(d2?.roster) ilPlayers = d2.roster;
+    }
+    if(!ilPlayers.length){
+      // Fallback: hardcoded known IL stints from spring training reports
+      document.getElementById('cinj').innerHTML = [
+        {nm:'Lars Nootbaar',pos:'OF',reason:'Heel surgery — mid-season return',sev:60},
+        {nm:'Hunter Dobbins',pos:'RHP',reason:'ACL rehab — late April',sev:15},
+      ].map(p=>`<div class="ilrow"><div class="il-dot il-${p.sev>30?'60':p.sev>10?'15':'10'}"></div><span class="il-nm">${p.nm}</span><span class="il-pos">${p.pos}</span><span class="il-reason">${p.reason}</span></div>`).join('');
+      return;
+    }
+    document.getElementById('cinj').innerHTML = ilPlayers.map(p=>{
+      const nm = p.person?.fullName||'—';
+      const pos = p.position?.abbreviation||'';
+      const note = p.status?.description||'IL';
+      return`<div class="ilrow"><div class="il-dot il-15"></div><span class="il-nm">${nm}</span><span class="il-pos">${pos}</span><span class="il-reason">${note}</span></div>`;
+    }).join('') || '<div class="empty">No current IL stints</div>';
+  } catch(e){
+    document.getElementById('cinj').innerHTML = '<div class="empty">IL data unavailable</div>';
+  }
+}
+
+/* ═══ FEATURE: CARDINALS TRANSACTIONS ═══ */
+async function fetchCardTransactions(){
+  try {
+    const end = new Date().toISOString().slice(0,10);
+    const start = new Date(Date.now()-30*86400000).toISOString().slice(0,10);
+    const r = await fetch(`https://statsapi.mlb.com/api/v1/transactions?teamId=138&startDate=${start}&endDate=${end}`);
+    const d = await r.json();
+    const txns = (d.transactions||[]).slice(0,12);
+    if(!txns.length){document.getElementById('ctx').innerHTML='<div class="empty">No recent transactions</div>';return;}
+    document.getElementById('ctx').innerHTML=txns.map(tx=>{
+      const dt = tx.date ? new Date(tx.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+      const name = tx.person?.fullName||'';
+      const desc = tx.description||tx.typeCode||'';
+      // Shorten description
+      const short = desc.length>80 ? desc.slice(0,80)+'…' : desc;
+      return`<div class="txrow"><span class="tx-dt">${dt}</span><span class="tx-desc">${short.replace(name,`<b>${name}</b>`)}</span></div>`;
+    }).join('');
+  } catch(e){
+    document.getElementById('ctx').innerHTML='<div class="empty">Transactions unavailable</div>';
+  }
+}
+
+/* ═══ FEATURE: HEADLINES (ESPN Public API) ═══ */
+async function fetchHeadlines(team, elId){
+  // ESPN team IDs: Cardinals = 24, Blues = 19
+  const espnIds = {cardinals:24, blues:19};
+  const sport = team==='cardinals'?'baseball/mlb':'hockey/nhl';
+  try {
+    const r = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${sport}/news?team=${espnIds[team]}&limit=6`);
+    const d = await r.json();
+    const articles = (d.articles||[]).slice(0,6);
+    if(!articles.length){document.getElementById(elId).innerHTML='<div class="empty" style="grid-column:1/-1">No headlines available</div>';return;}
+    document.getElementById(elId).innerHTML=articles.map(a=>{
+      const img = a.images?.[0]?.url||'';
+      const title = a.headline||'';
+      const src = a.source||'ESPN';
+      const url = a.links?.web?.href||'#';
+      return`<a class="hl-card" href="${url}" target="_blank">
+        ${img?`<img class="hl-img" src="${img}" alt="" onerror="this.style.display='none'">`:''}
+        <div class="hl-body"><div class="hl-title">${title}</div><div class="hl-src">${src}</div></div>
+      </a>`;
+    }).join('');
+  } catch(e){
+    document.getElementById(elId).innerHTML='<div class="empty" style="grid-column:1/-1">Headlines unavailable</div>';
+  }
+}
+
+/* ═══ INIT ═══ */
+document.addEventListener('DOMContentLoaded', () => {
+  renderField();
   renderCRot();
   renderCBull();
   renderCPros();
-  fetchCardsRecord();
-  fetchNews('St. Louis Cardinals baseball 2025','cnews','nl-c');
-
-  // Blues
+  renderCNews();
   renderBFwd();
   renderBDef();
   renderBGoal();
-  renderBScr();
   renderBPros();
   renderBDraft();
-  fetchBluesLive();
-  fetchNews('St. Louis Blues NHL 2025','bnews','nl-b');
+  renderBNews();
+  // Live API calls
+  fetchCardinals();
+  fetchBlues();
+  // New features
+  fetchNLCStandings();
+  fetchNHLStandings();
+  fetchCardSchedule();
+  fetchBluesSchedule();
+  fetchCardInjuries();
+  fetchCardTransactions();
+  fetchHeadlines('cardinals','chl');
+  fetchHeadlines('blues','bhl');
 });
 </script>
 </body>
